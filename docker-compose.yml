@@ -1,0 +1,19 @@
+version: '3.1'
+
+services:
+  postgresdb:
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5433:5432
+  db-management:
+    build:
+      context: ./docker/db-management
+      dockerfile: Dockerfile
+    ports:
+      - 690:8080
+    volumes:
+      # - ./docker/db-management:/usr/src/app
+      - ..:/usr/src/repos

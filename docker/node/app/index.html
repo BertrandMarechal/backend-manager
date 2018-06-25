@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample Site</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <style>
+        body { padding-top:50px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="jumbotron">
+            <h1>query</h1>
+            <textarea name="query" id="query"></textarea>
+            <button id="run">Run</button>
+        </div>
+        <div class="jumbotron" id="result">
+        </div>
+    </div>
+</body>
+<script>
+    $(document).ready(() => {
+        $("#run").click(() => {
+            console.log($("#query").val());
+        $.ajax({
+            url: "http://localhost:8080/query",
+            type: 'POST',
+            data: {
+                query: $("#query").val()
+            },
+            success: function( result ) {
+                console.log(result);
+                $( "#result" ).html( "<strong>" + JSON.stringify(result) + "</strong>" );
+            }
+        });
+        });
+    });
+</script>
+</html>

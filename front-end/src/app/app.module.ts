@@ -15,7 +15,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { StoreRouterConnectingModule } from '@ngrx/router-store';
 import { appRouting } from './app.routing';
 import { MaterialModule } from './modules/material/material.module';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { SettingsEditComponent } from './modules/management/settings-edit/settings-edit.component';
 import { SweetAlert2Module } from '@toverux/ngx-sweetalert2';
@@ -46,7 +46,7 @@ import { DatabaseVersionComponent } from './modules/databases/database/database-
     SweetAlert2Module.forRoot(),
     FormsModule,
     HttpClientModule,
-    NoopAnimationsModule,
+    BrowserAnimationsModule,
     StoreRouterConnectingModule,
     appRouting,
     StoreModule.forRoot(reducers),

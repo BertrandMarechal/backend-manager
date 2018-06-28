@@ -1,1 +1,29 @@
-<button mat-button (click)="onRunDiscovery()">Run Discovery</button>
+<div *ngIf="(management$|async)?.repositories">
+    <mat-accordion>
+        <mat-expansion-panel *ngFor="let repository of (management$|async)?.repositories" class="example-headers-align" hideToggle>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                     {{repository.name}}
+                </mat-panel-title>
+                <mat-panel-description *ngIf="repository.databases?.length > 0">
+                    Database
+                    <mat-icon>storage</mat-icon>
+                </mat-panel-description>
+                <mat-panel-description *ngIf="repository.middleTiers?.length > 0">
+                    Middle tier
+                    <mat-icon>functions</mat-icon>
+                </mat-panel-description>
+                <mat-panel-description *ngIf="repository.middleTiers?.length == 0 && repository.databases?.length == 0">
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+    
+            <mat-form-field>
+                <input matInput placeholder="First name">
+            </mat-form-field>
+    
+            <mat-form-field>
+                <input matInput placeholder="Age">
+            </mat-form-field>
+        </mat-expansion-panel>
+    </mat-accordion>
+</div>

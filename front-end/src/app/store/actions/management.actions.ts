@@ -64,13 +64,23 @@ export class ServiceRunRepoDiscoveryProgressAction implements Action {
 }
 export class ServiceRunRepoDiscoveryCompleteAction implements Action {
   readonly type = SERVICE_REPO_DISCOVERY_COMPLETE;
-  constructor() {}
+  constructor(public payload: any) {}
 }
 export class ServiceRunRepoDiscoveryFailedAction implements Action {
   readonly type = SERVICE_REPO_DISCOVERY_FAILED;
   constructor(public payload?: string) {}
 }
 
+export const MANAGEMENT_SERVER_CONNECTED =
+  '[Management] server connected';
+export class ManagementServerConnectedAction implements Action {
+  readonly type = MANAGEMENT_SERVER_CONNECTED;
+}
+export const MANAGEMENT_SERVER_DISCONNECTED =
+  '[Management] server disconnected';
+export class ManagementServerDisconnectedAction implements Action {
+  readonly type = MANAGEMENT_SERVER_DISCONNECTED;
+}
 
 export const MANAGEMENT_NOTHING =
     '[Management] nothing';
@@ -90,4 +100,6 @@ export type ManagementActions =
   | ServiceRunRepoDiscoveryProgressAction
   | ServiceRunRepoDiscoveryCompleteAction
   | ServiceRunRepoDiscoveryFailedAction
+  | ManagementServerConnectedAction
+  | ManagementServerDisconnectedAction
   | ManagementNothingAction;

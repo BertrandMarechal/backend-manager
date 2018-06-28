@@ -5,12 +5,25 @@
     <button mat-button routerLink="/">
       <mat-icon class="example-icon">home</mat-icon>
     </button>
-    <button mat-button routerLink="repositories">
+    <button mat-button routerLink="repositories" (click)="onRunDiscovery()">
+      <mat-icon class="example-icon">youtube_searched_for</mat-icon>
+    </button>
+    <button mat-button routerLink="repositories" *ngIf="(management$|async)?.repositories">
       <mat-icon class="example-icon">folder</mat-icon>
     </button>
     <button mat-button routerLink="settings">
       <mat-icon class="example-icon">settings</mat-icon>
     </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+<mat-toolbar *ngIf="!(management$|async)?.serverConnected" color="warn">
+  <mat-toolbar-row>
+    <span>Server not connected...</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+<mat-toolbar *ngIf="(management$|async)?.currentDiscoveryStep">
+  <mat-toolbar-row>
+    <span>{{(management$|async)?.currentDiscoveryStep?.stepName}}.</span>
   </mat-toolbar-row>
 </mat-toolbar>
 <router-outlet></router-outlet>

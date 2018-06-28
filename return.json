@@ -1,0 +1,10 @@
+[
+    {"name":"docker-node-python","databases":[],"middleTiers":[]},
+    {"name":"docker-udemy","databases":[],"middleTiers":[]},
+    {"name":"mock-environments","databases":[],"middleTiers":[]},
+    {"name":"test-database","databases":
+        [
+            {"id":1,"filePath":"test-database/postgres/release/0.0.0.0/version.json","databases":null},
+            {"id":2,"filePath":"test-database/postgres/release/1.0.0.0/version.json","databases":null}
+        ],"middleTiers":[]},
+            {"name":"test-middle-tier","databases":[],"middleTiers":[{"id":1,"fileName":"test-middle-tier/lambda/user","serviceName":"test-u","functions":null,"parameters":[{"id":1,"key":"pgConnStr","value":null}]}]}]

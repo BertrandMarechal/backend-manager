@@ -1,0 +1,72 @@
+[{
+    "folderName": "Schema",
+    "children" : [
+        {
+            "folderName": "00-database-setup"
+        },
+        {
+            "folderName": "01-types"
+        },
+        {
+            "folderName": "02-external-systems",
+            "children" :[
+                {
+                    "folderName": "00-replications",
+                    "children": [
+                        {
+                            "folderName": "00-foreign-servers"
+                        },
+                        {
+                            "folderName": "01-user-mappings"
+                        },
+                        {
+                            "folderName": "02-local-tables"
+                        },
+                        {
+                            "folderName": "03-foreign-tables"
+                        },
+                        {
+                            "folderName": "04-source-specific-app-setup"
+                        }
+                    ]
+                },
+                {
+                    "folderName": "01-data-transfers"
+                },
+                {
+                    "folderName": "02-external-system-integrations"
+                },
+                {
+                    "folderName": "03-data-exchange"
+                }
+            ]
+        },
+        {
+            "folderName": "03-tables"
+        },
+        {
+            "folderName": "04-sequences"
+        },
+        {
+            "folderName": "05-indexes"
+        },
+        {
+            "folderName": "06-views"
+        },
+        {
+            "folderName": "07-functions"
+        },
+        {
+            "folderName": "08-triggers"
+        },
+        {
+            "folderName": "09-data"
+        },
+        {
+            "folderName": "10-users-roles-permissions"
+        },
+        {
+            "folderName": "11-full-text-catalogues"
+        }
+    ]
+}]

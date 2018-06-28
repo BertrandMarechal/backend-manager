@@ -8,6 +8,7 @@ import { FileUtils } from '../utils/file.utils';
 import { DatabaseManagement } from './database-management';
 import { RepositoryReader } from './repository-reader';
 import { log } from 'util';
+import { Setting } from '../models/settings.model';
 
 
 export class ManagementServer {
@@ -117,25 +118,20 @@ export class ManagementServer {
             console.log('/settings');
             this.databaseManagement
             .execute('mgtf_get_settings')
-            .then((data: any) => {
-                res.send({error: null, data: data});
+            .then((settings: Setting[]) => {
+                res.send({error: null, data: settings});
             }).catch((error) => {
                 console.log(error);
-                
                 res.send({error: error});
             });
         });
         this.app.post('/settings/update', (req: any, res: any) => {
             console.log('/settings/update');
-            const body:{
-                name: string,
-                value: string,
-                id: number
-            }[] = req.body;
+            const body:Setting[] = req.body;
             this.databaseManagement
             .execute('mgtf_update_settings', [JSON.stringify(body)])
-            .then((data: any) => {
-                res.send({error: null, data: data});
+            .then((settings: Setting[]) => {
+                res.send({ error: null, data: settings});
             }).catch((error) => {
                 console.log(error);
                 res.send({error: error});
@@ -214,7 +210,62 @@ export class ManagementServer {
         this.client = client;
         this.client.on('run discovery', () => {
             console.log('run discovery');
-            this.client.emit('run discovery complete', null);
+            this.client.emit('run discovery progress', { completion: 1, stepName: 'Initiated' });
+            this.databaseManagement
+                .execute('mgtf_get_settings')
+                .then((settings: Setting[]) => {
+                    const promises = [
+                        { promise: this.repositoryReader.getRepositoryList.bind(this.repositoryReader), message: 'Get Repository List', completion: 20 },
+                        { promise: this.repositoryReader.getDatabasesVersionFiles.bind(this.repositoryReader), message: 'Get Database Version Files', completion: 40 },
+                        { promise: this.repositoryReader.getDatabaseParametersFromFiles.bind(this.repositoryReader), message: 'Get Database Parameters From Files', completion: 60 },
+                        { promise: this.repositoryReader.geMiddleTierRepositoriesServerlessFiles.bind(this.repositoryReader), message: 'Get MiddleTier Serverless Files', completion: 80 }
+                    ];
+
+                    this.repositoryReader.setSettings(settings);
+
+                    console.log('runPromises');
+                    this.runPromises(promises, (params: { completion: number, stepName: string }) => {
+                        this.client.emit('run discovery progress', params);
+                    }).then((data: any) => {
+                        this.client.emit('run discovery progress', { completion: 100, stepName: 'Done' });
+                        this.repositoryReader.geRepositoryData()
+                            .then((data: any) => {
+                                this.client.emit('run discovery complete', data);
+                            })
+                            .catch((error) => {
+                                this.client.emit('run discovery failed', error);
+                            })
+                    }).catch((error) => {
+                        console.log(error);
+                        this.client.emit('run discovery failed', error);
+                    });
+                }).catch((error) => {
+                    this.client.emit('run discovery failed', error);
+                });
+        });
+    }
+
+    private runPromises(promises: { promise: () => Promise<any>, message: string, completion: number }[], callback: (params: { completion: number, stepName: string }) => void) {
+        
+        return new Promise((resolve, reject) => {            
+            if (promises.length > 0) {
+                console.log(promises[0].message + ' todo');
+                promises[0].promise()
+                    .then(() => {
+                        console.log(promises[0].message + ' done');
+                        callback({stepName: promises[0].message, completion: promises[0].completion});
+                        promises.splice(0,1);
+                        this.runPromises(promises, callback)
+                            .then(resolve)
+                            .catch(reject);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        reject(error);
+                    });
+            } else {
+                resolve();
+            }
         });
     }
 }

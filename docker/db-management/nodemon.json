@@ -1,0 +1,10 @@
+{
+    "watch": [
+        ".", "../postgres/scripts/"
+    ],
+    "ignore": [
+        "src/**/*.spec.ts"
+    ],
+    "ext": "ts,sql",
+    "exec": "cls && ts-node main.ts 1"
+}

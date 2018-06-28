@@ -10,6 +10,8 @@ import {MatCardModule} from '@angular/material/card';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatDividerModule} from '@angular/material/divider';
+import {MatListModule} from '@angular/material/list';
+import {MatExpansionModule} from '@angular/material/expansion';
 
 @NgModule({
   imports: [
@@ -24,6 +26,8 @@ import {MatDividerModule} from '@angular/material/divider';
     MatProgressBarModule,
     MatGridListModule,
     MatDividerModule,
+    MatListModule,
+    MatExpansionModule,
   ],
   declarations: [],
   exports: [
@@ -37,6 +41,8 @@ import {MatDividerModule} from '@angular/material/divider';
     MatProgressBarModule,
     MatGridListModule,
     MatDividerModule,
+    MatListModule,
+    MatExpansionModule,
   ]
 })
 export class MaterialModule { }

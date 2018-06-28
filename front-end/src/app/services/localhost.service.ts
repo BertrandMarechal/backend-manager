@@ -2,16 +2,24 @@ import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import * as io from 'socket.io-client';
 import { environment } from '../../environments/environment';
+import * as fromManagement from '../store/reducers/management.reducers';
+import * as ManagementActions from '../store/actions/management.actions';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class LocalhostService {
   socket: any;
   socketConnected: boolean;
-  constructor(private httpClient: HttpClient) {
+  constructor(private httpClient: HttpClient,
+    private store: Store<fromManagement.State>) {
     this.socket = io.connect('http://localhost:' + environment.nodeServerPort);
     this.socket.on('connect', () => {
-        console.log('Connected');
+      this.store.dispatch(new ManagementActions.ManagementServerConnectedAction());
         this.socketConnected = true;
+    });
+    this.socket.on('disconnect', () => {
+        this.store.dispatch(new ManagementActions.ManagementServerDisconnectedAction());
+        this.socketConnected = false;
     });
   }
 
@@ -26,7 +34,6 @@ export class LocalhostService {
         cache: 'no-cache',
         credentials: 'same-origin',
       };
-      console.log(`http://localhost:${environment.nodeServerPort}/${url}`);
       this.httpClient.get(`http://localhost:${environment.nodeServerPort}/${url}`, httpOptions).toPromise()
         .then((result) => {
           console.log(result);

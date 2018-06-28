@@ -17,8 +17,4 @@ export class RepositoriesComponent implements OnInit {
   ngOnInit() {
     this.management$ = this.store.select('management');
   }
-
-  onRunDiscovery() {
-    this.store.dispatch(new ManagementActions.RunRepoDiscoveryPageAction());
-  }
 }

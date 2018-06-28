@@ -84,13 +84,25 @@ export class FileUtils {
         }
     }
 
-    static readFile(fileName: string) {
+    static readFile(fileName: string): Promise<string> {
         return new Promise((resolve, reject) => {
             fs.readFile(fileName, (error, data) => {
                 if (error) {
                     reject(error);
                 } else {
                     resolve(data.toString('ascii'));
+                }
+            });
+        });
+    }
+
+    static readJsonFile(fileName: string) {
+        return new Promise((resolve, reject) => {
+            fs.readFile(fileName, (error, data) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(JSON.parse(data.toString('ascii')));
                 }
             });
         });

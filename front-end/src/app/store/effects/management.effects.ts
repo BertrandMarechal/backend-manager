@@ -116,8 +116,7 @@ export class ManagementEffects {
               mergeMap((data: {data: ManagementSetting[]}) => {
                 return [
                   {
-                    type: ManagementActions.SERVICE_REPO_DISCOVERY_PROGRESS,
-                    payload: {completion: 1, stepName: 'Initiated'},
+                    type: ManagementActions.MANAGEMENT_NOTHING
                   },
                 ];
               }),

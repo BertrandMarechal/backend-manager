@@ -16,7 +16,7 @@ BEGIN
             SELECT pk_rep_id
             FROM mgtt_repository_rep
             WHERE rep_folder_name NOT IN (
-                SELECT split_part(unnest.unnest, '/', 4) as repo_name
+                SELECT unnest.unnest as repo_name
                 FROM unnest(i_repo_folder_list)
             )   
         )
@@ -28,22 +28,22 @@ BEGIN
             SELECT pk_rep_id
             FROM mgtt_repository_rep
             WHERE rep_folder_name NOT IN (
-                SELECT split_part(unnest.unnest, '/', 4) as repo_name
+                SELECT unnest.unnest as repo_name
                 FROM unnest(i_repo_folder_list)
             )   
         )
     );
 
     --DELETE OLD REPOS VERSIONS FILES
-    DELETE FROM mgtt_database_version_file_dbf
-    WHERE fk_dbv_dbf_database_version_id IN (
+    DELETE FROM mgtt_database_version_file_dvf
+    WHERE fk_dbv_dvf_database_version_id IN (
         SELECT pk_dbv_id
         FROM mgtt_database_version_dbv
         WHERE fk_rep_dbv_repo_id NOT IN (
             SELECT pk_rep_id
             FROM mgtt_repository_rep
             WHERE rep_folder_name NOT IN (
-                SELECT split_part(unnest.unnest, '/', 4) as repo_name
+                SELECT unnest.unnest as repo_name
                 FROM unnest(i_repo_folder_list)
             )   
         )
@@ -55,7 +55,7 @@ BEGIN
         SELECT pk_rep_id
         FROM mgtt_repository_rep
         WHERE rep_folder_name NOT IN (
-            SELECT split_part(unnest.unnest, '/', 4) as repo_name
+            SELECT unnest.unnest as repo_name
             FROM unnest(i_repo_folder_list)
         )   
     );    
@@ -66,7 +66,7 @@ BEGIN
         SELECT pk_rep_id
         FROM mgtt_repository_rep
         WHERE rep_folder_name NOT IN (
-            SELECT split_part(unnest.unnest, '/', 4) as repo_name
+            SELECT unnest.unnest as repo_name
             FROM unnest(i_repo_folder_list)
         )   
     );
@@ -74,13 +74,13 @@ BEGIN
     --DELETE THE OLD REPOS
     DELETE FROM mgtt_repository_rep
     WHERE rep_folder_name NOT IN (
-        SELECT split_part(unnest.unnest, '/', 4) as repo_name
+        SELECT unnest.unnest as repo_name
         FROM unnest(i_repo_folder_list)
     );
 
     --CREATE THE MISSING ONES
     INSERT INTO mgtt_repository_rep (rep_folder_name)
-    SELECT split_part(unnest.unnest, '/', 4) as repo_name
+    SELECT unnest.unnest as repo_name
     FROM unnest(i_repo_folder_list)
     ON CONFLICT(rep_folder_name) DO NOTHING;
 
@@ -94,11 +94,11 @@ BEGIN
     );
 
     --UPDATE REPO ID ON dbf
-    UPDATE mgtt_database_files_dfb
-    SET fk_rep_dfb_repo_id = (
+    UPDATE mgtt_database_file_dbf
+    SET fk_rep_dbf_repo_id = (
         SELECT pk_rep_id
         FROM mgtt_repository_rep
-        WHERE split_part(dfb_file_path, '/', 4) = rep_folder_name
+        WHERE split_part(dbf_file_path, '/', 1) = rep_folder_name
     );
     RETURN QUERY
     SELECT * FROM mgtf_get_repositories();

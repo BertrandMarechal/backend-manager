@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import * as fromManagement from '../../store/reducers/management.reducers';
+import * as ManagementActions from '../../store/actions/management.actions';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-management',
@@ -7,9 +11,16 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ManagementComponent implements OnInit {
 
-  constructor() { }
+  management$: Observable<fromManagement.State>;
+
+  constructor(private store: Store<fromManagement.State>) { }
 
   ngOnInit() {
+    this.management$ = this.store.select('management');
+  }
+
+  onRunDiscovery() {
+    this.store.dispatch(new ManagementActions.RunRepoDiscoveryPageAction());
   }
 
 }

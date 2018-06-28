@@ -31,8 +31,8 @@ export class ManagementService {
             this.localhostService.hookCallback('run discovery failed', (data) => {
                 this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryFailedAction(data));
             });
-            this.localhostService.hookCallback('run discovery complete', () => {
-                this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction());
+            this.localhostService.hookCallback('run discovery complete', (data) => {
+                this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
             this.localhostService.removeAllListeners([
                 'run discovery progress',
                 'run discovery failed',

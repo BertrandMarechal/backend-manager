@@ -1,0 +1,12 @@
+[
+    {
+        "userToUse": "root",
+        "dependencies": [],
+        "fileList": [
+            "..//postgres/schema/03-tables/db_table_tbl.sql"
+        ],
+        "changeLog": [
+            "Changed the timezone"
+        ]
+    }
+]

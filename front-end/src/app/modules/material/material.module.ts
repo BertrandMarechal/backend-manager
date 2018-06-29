@@ -12,6 +12,9 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatListModule} from '@angular/material/list';
 import {MatExpansionModule} from '@angular/material/expansion';
+import { MatTabsModule } from '@angular/material/tabs';
+import {MatBadgeModule} from '@angular/material/badge';
+import { MatChipsModule } from '@angular/material/chips';
 
 @NgModule({
   imports: [
@@ -28,6 +31,9 @@ import {MatExpansionModule} from '@angular/material/expansion';
     MatDividerModule,
     MatListModule,
     MatExpansionModule,
+    MatTabsModule,
+    MatBadgeModule,
+    MatChipsModule,
   ],
   declarations: [],
   exports: [
@@ -43,6 +49,9 @@ import {MatExpansionModule} from '@angular/material/expansion';
     MatDividerModule,
     MatListModule,
     MatExpansionModule,
+    MatTabsModule,
+    MatBadgeModule,
+    MatChipsModule,
   ]
 })
 export class MaterialModule { }

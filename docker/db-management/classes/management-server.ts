@@ -157,9 +157,33 @@ export class ManagementServer {
                 res.send({error: 'No repos yet. Please go to http://localhost:690/repositories'});
             }
         });
+        this.app.get('/databases/:repo/init/:dbalias', (req: any, res: any) => {
+            console.log('/databases/' + req.params.repo + '/init');
+            this.databaseManagement.createDatabaseFolderStructure(req.params.repo, req.params.dbalias)
+                .then((x: any) => ManagementServer.sendDataBack(x, res))
+                .catch((x: any) => ManagementServer.sendErrorBack(x, res));
+            
+            // if (this.repositories) {
+            //     Promise.all(this.repositories
+            //         .filter(x => x.isDatabase)
+            //         .map(x => FileUtils.getFileList({
+            //             filter: /version\.json/,
+            //             startPath: '../repos/' + x.name,
+            //             foldersToIgnore: ['typescript']
+            //         })))
+            //         .then((data) => {
+            //             this.databases = data;
+            //             res.send({ data: data });
+            //         }).catch((error) => {
+            //             res.send({ error: error });
+            //         });
+            // } else {
+            //     res.send({ error: 'No repos yet. Please go to http://localhost:690/repositories' });
+            // }
+        });
         this.app.get('/repositories', (req: any, res: any) => {
             console.log('/repositories');
-            this.repositoryReader.getRepositoryList()
+            this.repositoryReader.geRepositoryData()
             .then(x => ManagementServer.sendDataBack(x, res))
             .catch(x => ManagementServer.sendErrorBack(x, res));
         });
@@ -176,28 +200,6 @@ export class ManagementServer {
                 'http://localhost:690/databases'
             ];
             res.send(links.map(x => `<a href="${x}">${x}</a>`).join('<br/>'));
-        });
-        this.app.post('/installation-script', (req: any, res: any) => {
-            const body:{
-                query: string,
-                user?: string,
-                password?: string,
-                server?: string,
-                port?: string,
-                database? :string
-            } = req.body;
-
-            if (body.user && body.server && body.password && body.port && body.database) {
-                this.postgresUtils.setConnectionString(`postgres://${body.user}:${body.password}@${body.server}:${body.port}/${body.database}`);
-            }
-            
-            this.postgresUtils.execute(body.query)
-                .then((result) => {
-                    res.send({error: null, data: result});
-                })
-                .catch(result => {
-                    res.send({error: result, data: null});
-                });
         });
 
         this.io.on('connection', (client: any) => {

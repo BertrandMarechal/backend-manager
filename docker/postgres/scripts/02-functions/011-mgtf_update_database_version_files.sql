@@ -4,7 +4,12 @@ RETURNS INTEGER
 VOLATILE
 AS $CODE$
 BEGIN
-    DELETE FROM mgtt_database_file_dbf;
+    DELETE FROM mgtt_database_file_dbf
+    WHERE fk_rep_dbf_repo_id IN (
+        select pk_rep_id
+        FROM mgtt_repository_rep
+        WHERE rep_folder_name = i_repo_name
+    );
 
     --INSERT THE MISSING VERSIONS
     with raw_data as (

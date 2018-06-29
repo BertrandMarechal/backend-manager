@@ -1,5 +1,6 @@
 import { Action } from '@ngrx/store';
 import { ManagementSetting } from '../../models/management-settings.model';
+import { RepositoryFile } from '../../models/database.model';
 
 export const ROUTER_GET_SETTINGS =
     '[Settings router] get settings';
@@ -82,11 +83,51 @@ export class ManagementServerDisconnectedAction implements Action {
   readonly type = MANAGEMENT_SERVER_DISCONNECTED;
 }
 
+export const SELECT_ENVIRONMENT_PAGE_ACTION =
+  '[Management Page] select environment';
+export class SelecteEnvironmentPageAction implements Action {
+  readonly type = SELECT_ENVIRONMENT_PAGE_ACTION;
+  constructor(public payload: string) {}
+}
+export const SELECT_DATABASE_PAGE_ACTION =
+  '[Databases Page] select database';
+export class SelecteDatabasePageAction implements Action {
+  readonly type = SELECT_DATABASE_PAGE_ACTION;
+  constructor(public payload: any) {}
+}
+export const FILTER_DATABASE_FILES_PAGE_ACTION =
+  '[Database Page] filter database files';
+export class FilterDatabaseFilesPageAction implements Action {
+  readonly type = FILTER_DATABASE_FILES_PAGE_ACTION;
+  constructor(public payload: string) {}
+}
+
 export const MANAGEMENT_NOTHING =
     '[Management] nothing';
-  export class ManagementNothingAction implements Action {
-    readonly type = MANAGEMENT_NOTHING;
-  }
+export class ManagementNothingAction implements Action {
+  readonly type = MANAGEMENT_NOTHING;
+}
+
+
+
+export const ROUTER_GET_REPOSITORY_DATA =
+  '[Manegement router] get repository data';
+export const SERVICE_GET_REPOSITORY_DATA_COMPLETE =
+  '[Manegement Service] get repository data complete';
+export const SERVICE_GET_REPOSITORY_DATA_FAILED =
+  '[Manegement Service] get repository data failed';
+export class GetRepositoryDatarouterAction implements Action {
+  readonly type = ROUTER_GET_REPOSITORY_DATA;
+  constructor() { }
+}
+export class ServiceGetRepositoryDataCompleteAction implements Action {
+  readonly type = SERVICE_GET_REPOSITORY_DATA_COMPLETE;
+  constructor(public payload: RepositoryFile[]) { }
+}
+export class ServiceGetRepositoryDataFailedAction implements Action {
+  readonly type = SERVICE_GET_REPOSITORY_DATA_FAILED;
+  constructor(public payload?: string) { }
+}
 
 export type ManagementActions =
   | GetSettingsrouterAction
@@ -102,4 +143,10 @@ export type ManagementActions =
   | ServiceRunRepoDiscoveryFailedAction
   | ManagementServerConnectedAction
   | ManagementServerDisconnectedAction
+  | SelecteEnvironmentPageAction
+  | SelecteDatabasePageAction
+  | FilterDatabaseFilesPageAction
+  | GetRepositoryDatarouterAction
+  | ServiceGetRepositoryDataCompleteAction
+  | ServiceGetRepositoryDataFailedAction
   | ManagementNothingAction;

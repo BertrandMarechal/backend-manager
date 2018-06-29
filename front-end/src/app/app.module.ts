@@ -21,11 +21,12 @@ import { SettingsEditComponent } from './modules/management/settings-edit/settin
 import { SweetAlert2Module } from '@toverux/ngx-sweetalert2';
 import { HomeComponent } from './modules/management/home/home.component';
 import { RepositoriesComponent } from './modules/management/repositories/repositories.component';
-import { DatabasesComponent } from './modules/databases/databases.component';
-import { DatabaseComponent } from './modules/databases/database/database.component';
-import { DatabaseParametersComponent } from './modules/databases/database/database-parameters/database-parameters.component';
-import { DatabaseParametersEditComponent } from './modules/databases/database/database-parameters-edit/database-parameters-edit.component';
-import { DatabaseVersionComponent } from './modules/databases/database/database-version/database-version.component';
+import { DatabasesComponent } from './modules/management/databases/databases.component';
+import { DatabaseComponent } from './modules/management/databases/database/database.component';
+import { DatabaseParametersComponent } from './modules/management/databases/database/database-parameters/database-parameters.component';
+import { DatabaseVersionComponent } from './modules/management/databases/database/database-version/database-version.component';
+import { DatabaseParametersEditComponent } from './modules/management/databases/database/database-parameters-edit/database-parameters-edit.component';
+import { DatabaseParametersNotSetPipe } from './app/modules/management/databases/database-parameters-not-set.pipe';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { DatabaseVersionComponent } from './modules/databases/database/database-
     DatabaseParametersComponent,
     DatabaseParametersEditComponent,
     DatabaseVersionComponent,
+    DatabaseParametersNotSetPipe,
   ],
   imports: [
     BrowserModule,

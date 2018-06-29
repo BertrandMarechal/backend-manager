@@ -28,7 +28,7 @@ export class RouterUtilsService {
         firstChild = (<RouterNavigationAction>route).payload.routerState.root.firstChild;
       }
     }
-    if (segment.length === 1 && firstChild && firstChild.routeConfig.path === segment[0]) {
+    if (segment.length === 1 && firstChild && (firstChild.routeConfig.path === segment[0] || firstChild.url[0].path === segment[0])) {
       return firstChild;
     } else {
       const subSegment = [...segment];

@@ -5,15 +5,15 @@
                 <mat-panel-title>
                      {{repository.name}}
                 </mat-panel-title>
-                <mat-panel-description *ngIf="repository.databases?.length > 0">
+                <mat-panel-description *ngIf="repository.isDatabase">
                     Database
                     <mat-icon>storage</mat-icon>
                 </mat-panel-description>
-                <mat-panel-description *ngIf="repository.middleTiers?.length > 0">
+                <mat-panel-description *ngIf="repository.isMiddleTier">
                     Middle tier
                     <mat-icon>functions</mat-icon>
                 </mat-panel-description>
-                <mat-panel-description *ngIf="repository.middleTiers?.length == 0 && repository.databases?.length == 0">
+                <mat-panel-description *ngIf="!repository.isMiddleTier && !repository.isDatabase">
                 </mat-panel-description>
             </mat-expansion-panel-header>
     

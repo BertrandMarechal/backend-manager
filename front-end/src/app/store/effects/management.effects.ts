@@ -19,22 +19,65 @@ import { fromPromise } from 'rxjs/internal-compatibility';
 import { of } from 'rxjs/internal/observable/of';
 import { ManagementSetting } from "../../models/management-settings.model";
 import swal from 'sweetalert2';
+import { RepositoryFile } from "../../models/database.model";
 
 @Injectable()
 export class ManagementEffects {
-    
+
   @Effect()
   navigateToSettings: Observable<Action> = RouterUtilsService.handleNavigation(
     'settings',
     this.actions$,
     this.store.select('databases'),
-    (r: ActivatedRouteSnapshot, state: State) => {      
+    (r: ActivatedRouteSnapshot, state: State) => {
       return of({
         type: ManagementActions.ROUTER_GET_SETTINGS,
       });
     },
   );
-  
+
+  @Effect()
+  navigateToManagemnt: Observable<Action> = RouterUtilsService.handleNavigation(
+    'management',
+    this.actions$,
+    this.store.select('management'),
+    (r: ActivatedRouteSnapshot, state: State) => {
+      console.log('management');
+      return of({
+        type: ManagementActions.ROUTER_GET_REPOSITORY_DATA,
+      });
+    },
+  );
+
+  @Effect()
+  getRepositoryData: Observable<Action> = this.actions$
+    .ofType(ManagementActions.ROUTER_GET_REPOSITORY_DATA)
+    .pipe(
+      switchMap((action: ManagementActions.GetRepositoryDatarouterAction) => {
+        return fromPromise(
+          this.managementService.getRepositoryData(),
+        ).pipe(
+          mergeMap((data: { data: RepositoryFile[] }) => {
+            return [
+              {
+                type: ManagementActions.SERVICE_GET_REPOSITORY_DATA_COMPLETE,
+                payload: data.data,
+              },
+            ];
+          }),
+          catchError(error => {
+            console.log(error);
+            return [
+              {
+                type: ManagementActions.SERVICE_GET_REPOSITORY_DATA_FAILED,
+                payload: error.message,
+              },
+            ];
+          }),
+        );
+      }),
+  );
+
   @Effect()
   getSettings: Observable<Action> = this.actions$
     .ofType(ManagementActions.ROUTER_GET_SETTINGS)
@@ -79,7 +122,7 @@ export class ManagementEffects {
 
               const toast = (swal as any).mixin({
                 toast: true,
-                position: 'top-end',
+                position: 'bottom-end',
                 showConfirmButton: false,
                 timer: 3000
               });
@@ -138,7 +181,7 @@ export class ManagementEffects {
           switchMap((action: ManagementActions.ServiceRunRepoDiscoveryProgressAction) => {
             const toast = (swal as any).mixin({
               toast: true,
-              position: 'top-end',
+              position: 'bottom-end',
               showConfirmButton: false,
               timer: 3000
             });
@@ -160,7 +203,7 @@ export class ManagementEffects {
           switchMap((action: ManagementActions.ServiceRunRepoDiscoveryCompleteAction) => {
             const toast = (swal as any).mixin({
               toast: true,
-              position: 'top-end',
+              position: 'bottom-end',
               showConfirmButton: false,
               timer: 3000
             });
@@ -168,6 +211,19 @@ export class ManagementEffects {
               type: 'success',
               title: 'Complete'
             });
+            return [
+              {
+                type: ManagementActions.MANAGEMENT_NOTHING
+              },
+            ];
+          }),
+        );
+      @Effect()
+      selectDatabase: Observable<Action> = this.actions$
+        .ofType(ManagementActions.SELECT_DATABASE_PAGE_ACTION)
+        .pipe(
+          switchMap((action: ManagementActions.SelecteDatabasePageAction) => {
+            this.router.navigate(['/management', 'databases', action.payload.name]);
             return [
               {
                 type: ManagementActions.MANAGEMENT_NOTHING

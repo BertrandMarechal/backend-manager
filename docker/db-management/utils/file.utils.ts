@@ -96,7 +96,15 @@ export class FileUtils {
         });
     }
 
-    static readJsonFile(fileName: string) {
+    static readFileSync(fileName: string): string {
+        return fs.readFileSync(fileName).toString('ascii');
+    }
+
+    static writeFileSync(fileName: string, content: string) {
+        fs.writeFileSync(fileName, content);
+    }
+
+    static readJsonFile(fileName: string): Promise<any> {
         return new Promise((resolve, reject) => {
             fs.readFile(fileName, (error, data) => {
                 if (error) {
@@ -106,5 +114,11 @@ export class FileUtils {
                 }
             });
         });
+    }
+
+    static createFolderIfNotExistsSync(folderName: string) {
+        if (!fs.existsSync(folderName)) {            
+            fs.mkdirSync(folderName);
+        }
     }
 }

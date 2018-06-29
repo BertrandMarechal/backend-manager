@@ -19,7 +19,7 @@ BEGIN
 
     --ADD THE NEW ONES
     INSERT INTO mgtt_database_parameter_dpa(fk_rep_dpa_repository_id, dpa_name)
-    SELECT pk_rep_id, json_array_elements(i_data)
+    SELECT pk_rep_id, REPLACE(json_array_elements(i_data)::TEXT,'"','')
     FROM mgtt_repository_rep
     WHERE rep_folder_name = i_repo_name
     ON CONFLICT (dpa_name, fk_rep_dpa_repository_id) DO NOTHING;

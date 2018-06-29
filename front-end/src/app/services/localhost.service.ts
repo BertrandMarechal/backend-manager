@@ -36,7 +36,6 @@ export class LocalhostService {
       };
       this.httpClient.get(`http://localhost:${environment.nodeServerPort}/${url}`, httpOptions).toPromise()
         .then((result) => {
-          console.log(result);
           resolve(result);
         })
         .catch((result) => {

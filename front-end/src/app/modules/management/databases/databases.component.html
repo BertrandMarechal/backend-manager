@@ -1,0 +1,124 @@
+<mat-tab-group color="accent" backgroundColor="accent">
+  <mat-tab label="Install. per app.">
+    <mat-accordion>
+        <mat-expansion-panel *ngFor="let database of (management$|async)?.databases" class="example-headers-align" hideToggle>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <b>{{database.name}}</b>
+                </mat-panel-title>
+                <mat-panel-description>
+                  {{database.databases.length}} databases versions
+                  <mat-icon>storage</mat-icon>
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+    
+            <mat-accordion>
+              <mat-expansion-panel class="example-headers-align" hideToggle>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <b>Settings</b>
+                  </mat-panel-title>
+                  <mat-panel-description>
+                    Database settings {{(database.parameters|databaseParametersNotSet)}}
+                    <mat-chip-list>
+                      <mat-chip *ngIf="(database.parameters|databaseParametersNotSet) > 0">{{database.parameters|databaseParametersNotSet}} params not set</mat-chip>
+                    </mat-chip-list>
+                    <mat-icon>settings</mat-icon>
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+                <table>
+                  <tr *ngFor="let parameter of database.parameters">
+                    <td>{{parameter.name}}</td>
+                    <td style="padding-left: 20px">
+                      <mat-form-field class="example-full-width">
+                        <input matInput [placeholder]="parameter.name" value="Whatever">
+                      </mat-form-field>
+                    </td>
+                  </tr>
+                </table>
+                <mat-action-row>
+                  <button mat-button color="primary" (click)="onSaveParameters()">Save</button>
+                </mat-action-row>
+              </mat-expansion-panel>
+
+              <mat-expansion-panel *ngFor="let db of database.databases" class="example-headers-align" hideToggle>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <b>{{db.version}}</b>
+                  </mat-panel-title>
+                  <mat-panel-description>
+                    {{db.databases.length}} steps in the installation
+                    <mat-icon>description</mat-icon>
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <mat-accordion *ngIf="db.databases.length > 0">
+                  <mat-expansion-panel *ngFor="let dbVersion of db.databases" class="example-headers-align" hideToggle>
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>
+                        <b>{{dbVersion.version}}</b> - <span>{{dbVersion.databaseUserToUse}}</span>
+                      </mat-panel-title>
+                      <mat-panel-description>
+                        {{dbVersion.databaseFiles.length}} database scripts
+                        <mat-icon>class</mat-icon>
+                      </mat-panel-description>
+                    </mat-expansion-panel-header>
+
+                    <mat-accordion *ngIf="dbVersion.databaseFiles.length > 0">
+                      <mat-expansion-panel *ngFor="let dbFile of dbVersion.databaseFiles" class="example-headers-align" hideToggle>
+                        <mat-expansion-panel-header>
+                          <mat-panel-title>
+                            {{dbFile.filePath}}
+                          </mat-panel-title>
+                          <mat-panel-description>
+                            {{dbFile.position}}
+                            <mat-icon>insert_drive_file</mat-icon>
+                          </mat-panel-description>
+                        </mat-expansion-panel-header>
+                        <mat-action-row>
+                          <button mat-button color="primary" (click)="onInstall('File', dbFile)">Run script</button>
+                        </mat-action-row>
+                    
+                      </mat-expansion-panel>
+                    </mat-accordion>
+
+                    <mat-action-row>
+                      <button mat-button color="primary" (click)="onInstall('Version step', dbVersion)">Install version step</button>
+                    </mat-action-row>
+                
+                  </mat-expansion-panel>
+                </mat-accordion>
+
+                <mat-action-row>
+                  <button mat-button color="primary" (click)="onInstall('Version', db)">Install version</button>
+                </mat-action-row>
+            
+              </mat-expansion-panel>
+            </mat-accordion>
+
+            <mat-action-row>
+              <button mat-button color="primary" (click)="onInstall('Application', database)">Install application</button>
+            </mat-action-row>
+
+        </mat-expansion-panel>
+    </mat-accordion>
+  </mat-tab>
+  <mat-tab label="DB. exploter">
+    <mat-grid-list cols="4">
+      <mat-grid-tile colspan="1">
+        <mat-card style="width: 100%; height: 100%;">
+          <mat-nav-list>
+            <a
+              mat-list-item
+              *ngFor="let database of (management$|async)?.databases"
+              (click)="onSelectDatabase(database)"> {{ database.name }} </a>
+          </mat-nav-list>
+        </mat-card>
+      </mat-grid-tile>
+      <mat-grid-tile colspan="3">
+        <router-outlet></router-outlet>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </mat-tab>
+</mat-tab-group>
+

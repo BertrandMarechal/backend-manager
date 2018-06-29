@@ -23,4 +23,8 @@ export class ManagementComponent implements OnInit {
     this.store.dispatch(new ManagementActions.RunRepoDiscoveryPageAction());
   }
 
+  onSelecteEnvironment(environemnt: string) {
+    this.store.dispatch(new ManagementActions.SelecteEnvironmentPageAction(environemnt));
+  }
+
 }

@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import * as fromManagement from '../../../store/reducers/management.reducers';
-import * as ManagementActions from '../../../store/actions/management.actions';
 import { Observable } from 'rxjs/internal/Observable';
 import { Store } from '@ngrx/store';
 

@@ -31,6 +31,9 @@ import { InstallDatabasesComponent } from './modules/management/databases/instal
 import { databaseReducers } from './store/reducers/database.reducers';
 import { DatabaseEffects } from './store/effects/database.effects';
 import { DatabaseService } from './services/database.service';
+import { DatabaseTableEditComponent } from './modules/management/databases/database/database-table-edit/database-table-edit.component';
+import { DatabaseFunctionEditComponent } from './modules/management/databases/database/database-function-edit/database-function-edit.component';
+import { DatabaseObjectListComponent } from './modules/management/databases/database/database-object-list/database-object-list.component';
 
 @NgModule({
   declarations: [
@@ -47,6 +50,9 @@ import { DatabaseService } from './services/database.service';
     DatabaseVersionComponent,
     DatabaseParametersNotSetPipe,
     InstallDatabasesComponent,
+    DatabaseTableEditComponent,
+    DatabaseFunctionEditComponent,
+    DatabaseObjectListComponent,
   ],
   imports: [
     BrowserModule,
@@ -58,7 +64,7 @@ import { DatabaseService } from './services/database.service';
     appRouting,
     StoreModule.forRoot(reducers),
     StoreModule.forFeature('management', managementeReducers),
-    StoreModule.forFeature('database', databaseReducers),
+    StoreModule.forFeature('databaseManagement', databaseReducers),
     EffectsModule.forRoot([]),
     EffectsModule.forFeature([
       ManagementEffects,

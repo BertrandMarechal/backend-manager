@@ -65,7 +65,7 @@ export class ServiceRunRepoDiscoveryProgressAction implements Action {
 }
 export class ServiceRunRepoDiscoveryCompleteAction implements Action {
   readonly type = SERVICE_REPO_DISCOVERY_COMPLETE;
-  constructor(public payload: any) {}
+  constructor(public payload: RepositoryFile[]) {}
 }
 export class ServiceRunRepoDiscoveryFailedAction implements Action {
   readonly type = SERVICE_REPO_DISCOVERY_FAILED;
@@ -87,18 +87,6 @@ export const SELECT_ENVIRONMENT_PAGE_ACTION =
   '[Management Page] select environment';
 export class SelecteEnvironmentPageAction implements Action {
   readonly type = SELECT_ENVIRONMENT_PAGE_ACTION;
-  constructor(public payload: string) {}
-}
-export const SELECT_DATABASE_PAGE_ACTION =
-  '[Databases Page] select database';
-export class SelecteDatabasePageAction implements Action {
-  readonly type = SELECT_DATABASE_PAGE_ACTION;
-  constructor(public payload: any) {}
-}
-export const FILTER_DATABASE_FILES_PAGE_ACTION =
-  '[Database Page] filter database files';
-export class FilterDatabaseFilesPageAction implements Action {
-  readonly type = FILTER_DATABASE_FILES_PAGE_ACTION;
   constructor(public payload: string) {}
 }
 
@@ -144,8 +132,6 @@ export type ManagementActions =
   | ManagementServerConnectedAction
   | ManagementServerDisconnectedAction
   | SelecteEnvironmentPageAction
-  | SelecteDatabasePageAction
-  | FilterDatabaseFilesPageAction
   | GetRepositoryDatarouterAction
   | ServiceGetRepositoryDataCompleteAction
   | ServiceGetRepositoryDataFailedAction

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import * as fromManagement from '../../../../store/reducers/management.reducers';
-import * as ManagementActions from '../../../../store/actions/management.actions';
+import * as fromDatabase from '../../../../store/reducers/database.reducers';
+import * as DatabaseActions from '../../../../store/actions/database.actions';
 import { Observable } from 'rxjs/internal/Observable';
 import { Store } from '@ngrx/store';
 
@@ -12,12 +12,12 @@ type InstallationObjectType = 'Application' | 'Version' | 'Version step' | 'File
   styleUrls: ['./install-databases.component.css']
 })
 export class InstallDatabasesComponent implements OnInit {
-  management$: Observable<fromManagement.State>;
+  database$: Observable<fromDatabase.State>;
 
-  constructor(private store: Store<fromManagement.State>) { }
+  constructor(private store: Store<fromDatabase.State>) { }
 
   ngOnInit() {
-    this.management$ = this.store.select('management');
+    this.database$ = this.store.select('databaseManagement');
   }
 
   onInstall(type: InstallationObjectType, item: any) {

@@ -1,25 +1,56 @@
-<mat-card style="width: 100%; height: 100%;" *ngIf="(management$|async)?.selectedDatabase">
-  <input type="hidden" value="{{(management$|async)?.selectedDatabase?.name}}" #databaseName>
+<mat-card style="height: 100%;" *ngIf="(database$|async)?.selectedDatabase">
+  <input type="hidden" value="{{(database$|async)?.selectedDatabase?.name}}" #databaseName>
   <mat-card-title>
-    {{(management$|async)?.selectedDatabase?.name}}
+    {{(database$|async)?.selectedDatabase?.name}}
+
+    <button mat-button [matMenuTriggerFor]="databaseActions">Actions</button>
+
+    <mat-menu #databaseActions="matMenu">
+      <button mat-menu-item color="primary" routerLink="/management/databases/install" *ngIf="(database$|async)?.selectedDatabase?.databases?.length > 0">Install</button>
+      <button mat-menu-item *ngIf="(database$|async)?.canCreateNewVersion" color="accent" (click)="onCreateNewVersion(databaseName.value)">Create new version</button>
+      <button mat-menu-item *ngIf="(database$|async)?.selectedDatabase?.databases?.length === 0" color="primary" [disabled]="!dbAlias || dbAlias?.length < 2 || (database$|async)?.initializingDatabase"
+        (click)="onClickInitialize(databaseName.value)">
+        Initialize
+      </button>
+      <button mat-menu-item [matMenuTriggerFor]="schemaChanges" *ngIf="(database$|async)?.hasCurrentFolder">Schema changes</button>
+    </mat-menu>
+
+    <mat-menu #schemaChanges="matMenu">
+      <button mat-menu-item>Create</button>
+      <button mat-menu-item [matMenuTriggerFor]="tableActions">Tables</button>
+      <button mat-menu-item [matMenuTriggerFor]="functionActions">Functions</button>
+    </mat-menu>
+
+    <mat-menu #tableActions="matMenu">
+      <button mat-menu-item [swal]="{ title: 'Enter the table name', input: 'text' }" (confirm)="onCreateTable($event)">Create</button>
+      <button mat-menu-item [swal]="swalUpdateTable" *ngIf="(database$|async)?.tableFileList?.length > 0">Update</button>
+      <button mat-menu-item [swal]="swalDropTable" *ngIf="(database$|async)?.tableFileList?.length > 0">Drop</button>
+    </mat-menu>
+
+    <mat-menu #functionActions="matMenu">
+      <button mat-menu-item>Create</button>
+      <button mat-menu-item [swal]="swalUpdateFunction" *ngIf="(database$|async)?.functionFileList?.length > 0">Update</button>
+      <button mat-menu-item [swal]="swalDropFunction" *ngIf="(database$|async)?.functionFileList?.length > 0">Drop</button>
+    </mat-menu>
+
   </mat-card-title>
   <mat-card-subtitle>
-    {{(management$|async)?.selectedDatabase?.databases?.length}} versions
+    {{(database$|async)?.selectedDatabase?.databases?.length}} versions
   </mat-card-subtitle>
-  <mat-card-content *ngIf="(management$|async)?.selectedDatabase.databases?.length === 0">
+  <mat-card-content *ngIf="(database$|async)?.selectedDatabase.databases?.length === 0">
     <p>Looks like your database has not been initialized.</p>
     <p>Please give your database an alias and click on the button below to do so.</p>
     <mat-form-field>
       <input matInput placeholder="Alias" [(ngModel)]="dbAlias">
     </mat-form-field>
   </mat-card-content>
-  <mat-card-content *ngIf="(management$|async)?.selectedDatabase.databases?.length > 0">
+  <mat-card-content *ngIf="(database$|async)?.selectedDatabase.databases?.length > 0 && (database$|async)?.hasCurrentFolder">
+    <br>
     <mat-form-field>
-      <input matInput placeholder="Filter" value="" (keyup)="onFilter($event.target.value)">
+      <input matInput placeholder="Search for file" value="" (keyup)="onFilter($event.target.value)">
     </mat-form-field>
-
     <mat-accordion class="example-headers-align" *ngIf="filter">
-      <mat-expansion-panel *ngIf="(management$|async)?.filteredDatabaseFiles?.length === 0">
+      <mat-expansion-panel *ngIf="(database$|async)?.filteredDatabaseFiles?.length === 0">
         <mat-expansion-panel-header>
           <mat-panel-title>
             Nothing found ?
@@ -27,29 +58,41 @@
         </mat-expansion-panel-header>
         <span>Create a new file and refresh the data</span>
       </mat-expansion-panel>
-      <mat-expansion-panel *ngFor="let fileName of (management$|async)?.filteredDatabaseFiles">
+      <mat-expansion-panel *ngFor="let fileName of (database$|async)?.filteredDatabaseFiles">
         <mat-expansion-panel-header>
           <mat-panel-title>
             {{fileName}}
           </mat-panel-title>
         </mat-expansion-panel-header>
-
-        <mat-action-row>
-          <button mat-button color="primary">Do stuff</button>
+        <mat-action-row *ngIf="(database$|async)?.hasCurrentFolder">
+          <button mat-button color="primary">Update</button>
+          <button mat-button color="warn">Delete</button>
         </mat-action-row>
       </mat-expansion-panel>
-
     </mat-accordion>
   </mat-card-content>
-  <mat-card-actions *ngIf="(management$|async)?.selectedDatabase?.databases?.length > 0">
-    <button mat-button color="primary" routerLink="/management/databases/install">Install</button>
-  </mat-card-actions>
-  <mat-card-actions *ngIf="(management$|async)?.selectedDatabase">
-    <button mat-button color="accent" (click)="onCreateNewVersion(databaseName.value)">Create new version</button>
-  </mat-card-actions>
-  <mat-card-actions *ngIf="(management$|async)?.selectedDatabase?.databases?.length === 0">
-    <button mat-button color="primary" [disabled]="!dbAlias || dbAlias?.length < 2 || (database$|async)?.initializingDatabase" (click)="onClickInitialize(databaseName.value)">
-      Initialize
-    </button>
-  </mat-card-actions>
 </mat-card>
+
+<swal #swalUpdateTable title="Update table" [showConfirmButton]="false">
+  <div *swalPartial>
+    <app-database-object-list [objectList]="(database$|async)?.tableFileList" (objectSelected)="onUpdateObject({ fileName: $event,mode: 'update', repoName: 'dummy'})" (cancel)="closeSwal()"></app-database-object-list>
+  </div>
+</swal>
+
+<swal #swalDropTable title="Drop table" [showConfirmButton]="false">
+  <div *swalPartial>
+    <app-database-object-list [objectList]="(database$|async)?.tableFileList" (objectSelected)="onUpdateObject({ fileName: $event,mode: 'drop', repoName: 'dummy'})" (cancel)="closeSwal()"></app-database-object-list>
+  </div>
+</swal>
+
+<swal #swalUpdateFunction title="Update function" [showConfirmButton]="false">
+  <div *swalPartial>
+    <app-database-object-list [objectList]="(database$|async)?.functionFileList" (objectSelected)="onUpdateObject({ fileName: $event,mode: 'update', repoName: 'dummy'})" (cancel)="closeSwal()"></app-database-object-list>
+  </div>
+</swal>
+
+<swal #swalDropFunction title="Drop function" [showConfirmButton]="false">
+  <div *swalPartial>
+    <app-database-object-list [objectList]="(database$|async)?.functionFileList" (objectSelected)="onUpdateObject({ fileName: $event,mode: 'drop', repoName: 'dummy'})" (cancel)="closeSwal()"></app-database-object-list>
+  </div>
+</swal>

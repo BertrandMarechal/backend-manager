@@ -43,7 +43,7 @@
           <a matLine>Repositories</a>
         </mat-list-item>
 
-        <mat-list-item *ngIf="(management$|async)?.databases?.length > 0" (click)="databasesOpen = !databasesOpen">
+        <mat-list-item *ngIf="(management$|async)?.hasDatabases" (click)="databasesOpen = !databasesOpen">
           <button mat-icon-button>
             <mat-icon>storage</mat-icon>
           </button>
@@ -51,7 +51,7 @@
           <br>
         </mat-list-item>
 
-        <mat-list-item *ngIf="(management$|async)?.databases?.length > 0 && databasesOpen"
+        <mat-list-item *ngIf="(management$|async)?.hasDatabases && databasesOpen"
           style="background-color: #f1f1f1;"
           routerLink="databases/install"
           routerLinkActive="active-link">
@@ -60,7 +60,7 @@
         </mat-list-item>
 
 
-        <mat-list-item *ngFor=" let database of (databasesOpen? (management$|async)?.databases : [])"
+        <mat-list-item *ngFor=" let database of (databasesOpen? (databases$|async)?.databases : [])"
           (click)="onSelectDatabase(database)"
           routerLinkActive="active-link"
           style="background-color: #f1f1f1;">

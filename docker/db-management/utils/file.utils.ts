@@ -88,6 +88,7 @@ export class FileUtils {
         return new Promise((resolve, reject) => {
             fs.readFile(fileName, (error, data) => {
                 if (error) {
+                    console.log(error);
                     reject(error);
                 } else {
                     resolve(data.toString('ascii'));
@@ -101,6 +102,9 @@ export class FileUtils {
     }
 
     static writeFileSync(fileName: string, content: string) {
+        console.log('Creating ' + fileName);
+        
+        FileUtils.createFolderStructureIfNeeded(fileName);
         fs.writeFileSync(fileName, content);
     }
 
@@ -124,5 +128,15 @@ export class FileUtils {
 
     static checkIfFolderExists(folderName: string) {
         return fs.existsSync(folderName);
+    }
+
+    static createFolderStructureIfNeeded(path: string, depth: number = 0): void {
+        const splitPath = path.replace('//','/').split('/');
+        if (depth === splitPath.length - 1) {
+            return;
+        } else {
+            FileUtils.createFolderIfNotExistsSync(splitPath.splice(0,depth + 1).join('/'));
+            FileUtils.createFolderStructureIfNeeded(path, depth + 1);
+        }
     }
 }

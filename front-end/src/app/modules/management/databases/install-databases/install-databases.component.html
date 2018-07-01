@@ -1,5 +1,5 @@
 <mat-accordion>
-  <mat-expansion-panel *ngFor="let database of (management$|async)?.databases" class="example-headers-align" hideToggle>
+  <mat-expansion-panel *ngFor="let database of (database$|async)?.databases" class="example-headers-align" hideToggle>
     <mat-expansion-panel-header>
       <mat-panel-title>
         <b>{{database.name}}</b>

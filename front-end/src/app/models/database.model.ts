@@ -5,7 +5,7 @@ export interface RepositoryFile {
     databases: DatabaseFile[];
     isDatabase: boolean;
     middleTiers: MiddleTierFile[];
-    isMiddleTIer: boolean;
+    isMiddleTier: boolean;
     parameters: RepositoryParameter[];
 }
 export interface MiddleTierFile {

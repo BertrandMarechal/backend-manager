@@ -289,9 +289,29 @@ export class ManagementServer {
                 .catch((error) => {
                     this.client.emit('create database version failed', error);
                 });
-
         });
-        
+        this.client.on('prepare update object', (params: {repoName: string, fileName: string, mode: string}) => {
+            console.log('prepare update object');
+            this.databaseManagement.prepareUpdateDatabaseObject(params)
+                .then((x: any) => {
+                    this.repositoryReader.getRepoDatabaseFiles(params.repoName)
+                        .then(() => {
+                            this.repositoryReader.geRepositoryData()
+                                .then((data: any) => {
+                                    this.client.emit('run discovery complete', data);
+                                })
+                                .catch((error) => {
+                                    this.client.emit('prepare update object failed', error);
+                                })
+                        })
+                        .catch((error) => {
+                            this.client.emit('prepare update object failed', error);
+                        })
+                })
+                .catch((error) => {
+                    this.client.emit('prepare update object failed', error);
+                });
+        });
     }
 
     private runPromises(promises: { promise: () => Promise<any>, message: string, completion: number }[], callback: (params: { completion: number, stepName: string }) => void) {

@@ -13,7 +13,7 @@ export class FileUtils {
                 foldersToIgnore.push('node_modules');
             }
         }
-        
+
         if (!fs.existsSync(params.startPath)) {
             console.log(params.startPath + ' does not exist');
             return Promise.resolve([]);
@@ -35,7 +35,7 @@ export class FileUtils {
             });
             if (directories.length > 0) {
                 return Promise.all(directories.map((x: string) => {
-                    return FileUtils.getFileList({startPath: params.startPath + '/' + x, filter: params.filter, foldersToIgnore: foldersToIgnore})
+                    return FileUtils.getFileList({ startPath: params.startPath + '/' + x, filter: params.filter, foldersToIgnore: foldersToIgnore })
                 })).then((fileLists: any) => {
                     let fileList = fileLists.reduce((current: string[], item: string[]) => {
                         current = current.concat(item);
@@ -54,7 +54,7 @@ export class FileUtils {
             }
         }
     }
-    
+
     static getFolderList(params: {
         startPath: string,
         foldersToIgnore?: string[]
@@ -65,7 +65,7 @@ export class FileUtils {
                 foldersToIgnore.push('node_modules');
             }
         }
-        
+
         if (!fs.existsSync(params.startPath)) {
             console.log(params.startPath + ' does not exist');
             return Promise.resolve([]);
@@ -79,7 +79,7 @@ export class FileUtils {
                     return foldersToIgnore.filter(y => fileName.indexOf(y) > -1).length === 0
                 }
                 return false;
-            });            
+            });
             return Promise.resolve(directories.map(x => params.startPath + '/' + x));
         }
     }
@@ -117,8 +117,12 @@ export class FileUtils {
     }
 
     static createFolderIfNotExistsSync(folderName: string) {
-        if (!fs.existsSync(folderName)) {            
+        if (!fs.existsSync(folderName)) {
             fs.mkdirSync(folderName);
         }
+    }
+
+    static checkIfFolderExists(folderName: string) {
+        return fs.existsSync(folderName);
     }
 }

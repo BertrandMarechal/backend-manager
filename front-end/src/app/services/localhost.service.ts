@@ -12,15 +12,17 @@ export class LocalhostService {
   socketConnected: boolean;
   constructor(private httpClient: HttpClient,
     private store: Store<fromManagement.State>) {
-    this.socket = io.connect('http://localhost:' + environment.nodeServerPort);
-    this.socket.on('connect', () => {
-      this.store.dispatch(new ManagementActions.ManagementServerConnectedAction());
-        this.socketConnected = true;
-    });
-    this.socket.on('disconnect', () => {
-        this.store.dispatch(new ManagementActions.ManagementServerDisconnectedAction());
-        this.socketConnected = false;
-    });
+      setTimeout(() => {
+        this.socket = io.connect('http://localhost:' + environment.nodeServerPort);
+        this.socket.on('connect', () => {
+          this.store.dispatch(new ManagementActions.ManagementServerConnectedAction());
+            this.socketConnected = true;
+        });
+        this.socket.on('disconnect', () => {
+            this.store.dispatch(new ManagementActions.ManagementServerDisconnectedAction());
+            this.socketConnected = false;
+        });
+      }, 500);
   }
 
   get(url: string) {

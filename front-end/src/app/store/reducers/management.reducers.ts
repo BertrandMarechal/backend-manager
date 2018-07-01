@@ -101,6 +101,11 @@ export function managementeReducers(state = initialState, action: ManagementActi
         };
     case ManagementActions.SERVICE_REPO_DISCOVERY_COMPLETE:
     case ManagementActions.SERVICE_GET_REPOSITORY_DATA_COMPLETE:
+        let selectedDatabase = null;
+        if (state.selectedDatabase) {
+            selectedDatabase = (action.payload || [])
+                .filter(x => x.isDatabase && x.name === state.selectedDatabase.name)[0];
+        }
         return {
             ...state,
             currentDiscoveryStep: null,
@@ -111,7 +116,8 @@ export function managementeReducers(state = initialState, action: ManagementActi
                     };
                 }),
             repositories: action.payload || [],
-            databases: (action.payload || []).filter(x => x.isDatabase)
+            databases: (action.payload || []).filter(x => x.isDatabase),
+            selectedDatabase: selectedDatabase
         };
     case ManagementActions.MANAGEMENT_SERVER_CONNECTED:
       return {
@@ -145,7 +151,6 @@ export function managementeReducers(state = initialState, action: ManagementActi
                             .reduce((a, c) => a.concat(c), []);
                     }).reduce((a, c) => a.concat(c), []);
                 }).reduce((a, c) => a.concat(c), []);
-            console.log(files);
             files = files
                 .filter(x => x.indexOf('postgres/schema/') > -1)
                 .filter(x => x.indexOf(action.payload) > -1);

@@ -7,6 +7,7 @@ import { HomeComponent } from './modules/management/home/home.component';
 import { RepositoriesComponent } from './modules/management/repositories/repositories.component';
 import { DatabasesComponent } from './modules/management/databases/databases.component';
 import { DatabaseComponent } from './modules/management/databases/database/database.component';
+import { InstallDatabasesComponent } from './modules/management/databases/install-databases/install-databases.component';
 
 const routes: Routes = [
   {
@@ -25,6 +26,10 @@ const routes: Routes = [
         path: 'databases',
         component: DatabasesComponent,
         children: [
+          {
+            path: 'install',
+            component: InstallDatabasesComponent
+          },
           {
             path: ':code',
             component: DatabaseComponent

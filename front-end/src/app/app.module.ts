@@ -15,7 +15,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { StoreRouterConnectingModule } from '@ngrx/router-store';
 import { appRouting } from './app.routing';
 import { MaterialModule } from './modules/material/material.module';
-import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { SettingsEditComponent } from './modules/management/settings-edit/settings-edit.component';
 import { SweetAlert2Module } from '@toverux/ngx-sweetalert2';
@@ -26,7 +26,11 @@ import { DatabaseComponent } from './modules/management/databases/database/datab
 import { DatabaseParametersComponent } from './modules/management/databases/database/database-parameters/database-parameters.component';
 import { DatabaseVersionComponent } from './modules/management/databases/database/database-version/database-version.component';
 import { DatabaseParametersEditComponent } from './modules/management/databases/database/database-parameters-edit/database-parameters-edit.component';
-import { DatabaseParametersNotSetPipe } from './app/modules/management/databases/database-parameters-not-set.pipe';
+import { DatabaseParametersNotSetPipe } from './modules/management/databases/database-parameters-not-set.pipe';
+import { InstallDatabasesComponent } from './modules/management/databases/install-databases/install-databases.component';
+import { databaseReducers } from './store/reducers/database.reducers';
+import { DatabaseEffects } from './store/effects/database.effects';
+import { DatabaseService } from './services/database.service';
 
 @NgModule({
   declarations: [
@@ -42,6 +46,7 @@ import { DatabaseParametersNotSetPipe } from './app/modules/management/databases
     DatabaseParametersEditComponent,
     DatabaseVersionComponent,
     DatabaseParametersNotSetPipe,
+    InstallDatabasesComponent,
   ],
   imports: [
     BrowserModule,
@@ -53,13 +58,15 @@ import { DatabaseParametersNotSetPipe } from './app/modules/management/databases
     appRouting,
     StoreModule.forRoot(reducers),
     StoreModule.forFeature('management', managementeReducers),
+    StoreModule.forFeature('database', databaseReducers),
     EffectsModule.forRoot([]),
     EffectsModule.forFeature([
-      ManagementEffects
+      ManagementEffects,
+      DatabaseEffects
     ]),
     MaterialModule,
   ],
-  providers: [LocalhostService, ManagementService],
+  providers: [LocalhostService, ManagementService, DatabaseService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

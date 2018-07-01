@@ -107,7 +107,7 @@ export class RepositoryReader {
         });
     }
 
-    private getRepoDatabaseFiles(repoName: string): Promise<any> {
+    getRepoDatabaseFiles(repoName: string): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getDatabaseVersionFiles(repoName)
                 .then((fileList: string[]) => {

@@ -90,8 +90,8 @@
                         "folderName": "03-tables",
                         "children": [
                             {
-                                "fileName": "db_table_tbl.sql",
-                                "fileSource": "table.sql"
+                                "fileName": "<db>_version_ver.sql",
+                                "fileSource": "version_table.sql"
                             }
                         ]
                     },

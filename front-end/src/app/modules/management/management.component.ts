@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 export class ManagementComponent implements OnInit {
 
   management$: Observable<fromManagement.State>;
+  databasesOpen: boolean;
 
   constructor(private store: Store<fromManagement.State>) { }
 
@@ -27,4 +28,7 @@ export class ManagementComponent implements OnInit {
     this.store.dispatch(new ManagementActions.SelecteEnvironmentPageAction(environemnt));
   }
 
+  onSelectDatabase(database: any) {
+    this.store.dispatch(new ManagementActions.SelecteDatabasePageAction(database));
+  }
 }

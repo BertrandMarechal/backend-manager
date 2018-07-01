@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as bodyParser from 'body-parser';
 import * as path from 'path';
 import IO from "socket.io";
-import {PostgresUtils} from '../utils/postgres.utils';
+import { PostgresUtils } from '../utils/postgres.utils';
 import { FileUtils } from '../utils/file.utils';
 import { DatabaseManagement } from './database-management';
 import { RepositoryReader } from './repository-reader';
@@ -19,7 +19,7 @@ export class ManagementServer {
     private httpServer: any;
     private postgresUtils: PostgresUtils;
     private databaseManagement: DatabaseManagement;
-    private repositories?: {name: string, isDatabase: boolean, isMiddleTier: boolean}[];
+    private repositories?: { name: string, isDatabase: boolean, isMiddleTier: boolean }[];
     private databases?: any;
     private repositoryReader: RepositoryReader;
 
@@ -50,13 +50,13 @@ export class ManagementServer {
         });
 
         this.app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-        this.app.use( bodyParser.json({limit: '50mb'}) );       // to support JSON-encoded bodies
-        
+        this.app.use(bodyParser.json({ limit: '50mb' }));       // to support JSON-encoded bodies
+
         this.declareRoutes();
         if (process.argv[2]) {
             this.runDatabaseInitializationSctipt();
         }
-        this.server.listen(process.argv[2]? 690 : 8080, (error: any) => {
+        this.server.listen(process.argv[2] ? 690 : 8080, (error: any) => {
             console.log('listening');
         });
 
@@ -72,32 +72,32 @@ export class ManagementServer {
                 startPath: '../postgres/scripts',
                 filter: /\.sql/
             })
-            .then((fileList) => {
-                console.log(fileList.length + ' files to run');
+                .then((fileList) => {
+                    console.log(fileList.length + ' files to run');
 
-                this.runFiles(fileList)
-                    .then(resolve)
-                    .catch(reject);
-            });
+                    this.runFiles(fileList)
+                        .then(resolve)
+                        .catch(reject);
+                });
         });
     }
 
     private runFiles(fileList: string[]): Promise<any> {
-        if (fileList.length > 0){
+        if (fileList.length > 0) {
             return new Promise((resolve, reject) => {
                 FileUtils.readFile(fileList[0])
-                .then((command: any) => {
-                    console.log('Running ' + fileList[0]);
-                    
-                    this.postgresUtils.execute(command)
-                        .then(() => {
-                            fileList.splice(0,1);
-                            return this.runFiles(fileList);
-                        })
-                        .catch(() => {
-                            reject();
-                        });
-                })
+                    .then((command: any) => {
+                        console.log('Running ' + fileList[0]);
+
+                        this.postgresUtils.execute(command)
+                            .then(() => {
+                                fileList.splice(0, 1);
+                                return this.runFiles(fileList);
+                            })
+                            .catch(() => {
+                                reject();
+                            });
+                    })
             });
         } else {
             console.log('### DONE ###');
@@ -106,36 +106,36 @@ export class ManagementServer {
     }
 
     private static sendDataBack(result: any, res: any) {
-        res.send({data: result});
+        res.send({ data: result });
     }
 
     private static sendErrorBack(error: any, res: any) {
-        res.send({error: error});
+        res.send({ error: error });
     }
 
     private declareRoutes() {
         this.app.get('/settings', (req: any, res: any) => {
             console.log('/settings');
             this.databaseManagement
-            .execute('mgtf_get_settings')
-            .then((settings: Setting[]) => {
-                res.send({error: null, data: settings});
-            }).catch((error) => {
-                console.log(error);
-                res.send({error: error});
-            });
+                .execute('mgtf_get_settings')
+                .then((settings: Setting[]) => {
+                    res.send({ error: null, data: settings });
+                }).catch((error) => {
+                    console.log(error);
+                    res.send({ error: error });
+                });
         });
         this.app.post('/settings/update', (req: any, res: any) => {
             console.log('/settings/update');
-            const body:Setting[] = req.body;
+            const body: Setting[] = req.body;
             this.databaseManagement
-            .execute('mgtf_update_settings', [JSON.stringify(body)])
-            .then((settings: Setting[]) => {
-                res.send({ error: null, data: settings});
-            }).catch((error) => {
-                console.log(error);
-                res.send({error: error});
-            });
+                .execute('mgtf_update_settings', [JSON.stringify(body)])
+                .then((settings: Setting[]) => {
+                    res.send({ error: null, data: settings });
+                }).catch((error) => {
+                    console.log(error);
+                    res.send({ error: error });
+                });
         });
         this.app.get('/databases', (req: any, res: any) => {
             console.log('/databases');
@@ -149,12 +149,12 @@ export class ManagementServer {
                     })))
                     .then((data) => {
                         this.databases = data;
-                        res.send({data: data});
+                        res.send({ data: data });
                     }).catch((error) => {
-                        res.send({error: error});
+                        res.send({ error: error });
                     });
             } else {
-                res.send({error: 'No repos yet. Please go to http://localhost:690/repositories'});
+                res.send({ error: 'No repos yet. Please go to http://localhost:690/repositories' });
             }
         });
         this.app.get('/databases/:repo/init/:dbalias', (req: any, res: any) => {
@@ -162,7 +162,7 @@ export class ManagementServer {
             this.databaseManagement.createDatabaseFolderStructure(req.params.repo, req.params.dbalias)
                 .then((x: any) => ManagementServer.sendDataBack(x, res))
                 .catch((x: any) => ManagementServer.sendErrorBack(x, res));
-            
+
             // if (this.repositories) {
             //     Promise.all(this.repositories
             //         .filter(x => x.isDatabase)
@@ -184,17 +184,17 @@ export class ManagementServer {
         this.app.get('/repositories', (req: any, res: any) => {
             console.log('/repositories');
             this.repositoryReader.geRepositoryData()
-            .then(x => ManagementServer.sendDataBack(x, res))
-            .catch(x => ManagementServer.sendErrorBack(x, res));
+                .then(x => ManagementServer.sendDataBack(x, res))
+                .catch(x => ManagementServer.sendErrorBack(x, res));
         });
         this.app.get('/repositories/refresh-all', (req: any, res: any) => {
             console.log('/repositories/refresh-all');
             this.repositoryReader.getRepositoryList()
-            .then(x => ManagementServer.sendDataBack(x, res))
-            .catch(x => ManagementServer.sendErrorBack(x, res));
+                .then(x => ManagementServer.sendDataBack(x, res))
+                .catch(x => ManagementServer.sendErrorBack(x, res));
         });
 
-        this.app.get('/', function(req: any, res: any) {
+        this.app.get('/', function (req: any, res: any) {
             const links = [
                 'http://localhost:690/repositories',
                 'http://localhost:690/databases'
@@ -245,18 +245,65 @@ export class ManagementServer {
                     this.client.emit('run discovery failed', error);
                 });
         });
+        this.client.on('initialize database', (params: { repoName: string, dbAlias: string }) => {
+            console.log('initialize database');
+            this.databaseManagement.createDatabaseFolderStructure(params.repoName, params.dbAlias)
+                .then((x: any) => {
+                    this.repositoryReader.getRepoDatabaseFiles(params.repoName)
+                        .then(() => {
+                            this.repositoryReader.geRepositoryData()
+                                .then((data: any) => {
+                                    this.client.emit('run discovery complete', data);
+                                })
+                                .catch((error) => {
+                                    this.client.emit('initialize database failed', error);
+                                })
+                        })
+                        .catch((error) => {
+                            this.client.emit('initialize database failed', error);
+                        })
+                })
+                .catch((error) => {
+                    this.client.emit('initialize database failed', error);
+                });
+
+        });
+        this.client.on('create database version', (repoName: string) => {
+            console.log('create database version');
+            this.databaseManagement.createNewVersion(repoName)
+                .then((x: any) => {
+                    this.repositoryReader.getRepoDatabaseFiles(repoName)
+                        .then(() => {
+                            this.repositoryReader.geRepositoryData()
+                                .then((data: any) => {
+                                    this.client.emit('run discovery complete', data);
+                                })
+                                .catch((error) => {
+                                    this.client.emit('create database version failed', error);
+                                })
+                        })
+                        .catch((error) => {
+                            this.client.emit('create database version failed', error);
+                        })
+                })
+                .catch((error) => {
+                    this.client.emit('create database version failed', error);
+                });
+
+        });
+        
     }
 
     private runPromises(promises: { promise: () => Promise<any>, message: string, completion: number }[], callback: (params: { completion: number, stepName: string }) => void) {
-        
-        return new Promise((resolve, reject) => {            
+
+        return new Promise((resolve, reject) => {
             if (promises.length > 0) {
                 console.log(promises[0].message + ' todo');
                 promises[0].promise()
                     .then(() => {
                         console.log(promises[0].message + ' done');
-                        callback({stepName: promises[0].message, completion: promises[0].completion});
-                        promises.splice(0,1);
+                        callback({ stepName: promises[0].message, completion: promises[0].completion });
+                        promises.splice(0, 1);
                         this.runPromises(promises, callback)
                             .then(resolve)
                             .catch(reject);

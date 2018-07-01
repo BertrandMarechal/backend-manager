@@ -62,8 +62,34 @@ export class DatabaseManagement {
                 }
                 source = source.replace(/\<db\>/gi, dbAlias);
             }
-            console.log('Creating ' + currentPath + folderStructureItem.fileName);
-            FileUtils.writeFileSync(currentPath + folderStructureItem.fileName, source);
+            const fileName = folderStructureItem.fileName.replace(/\<db\>/gi, dbAlias);
+            console.log('Creating ' + currentPath + fileName);
+            FileUtils.writeFileSync(currentPath + fileName, source);
         }
+    }
+
+    createNewVersion(repoName: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            // check that the current folder exists or not in release and postgres
+            const alreadyExists = FileUtils.checkIfFolderExists(originFolder + repoName + '/postgres/release/current') ||
+                FileUtils.checkIfFolderExists(originFolder + repoName + '/postgres/current');
+            if (alreadyExists) {
+                reject('Current version already exists')
+            } else {
+                // create the version.json file
+                // create the current folder in postgres
+                FileUtils.createFolderIfNotExistsSync(originFolder + repoName + '/postgres/release/current');
+                FileUtils.createFolderIfNotExistsSync(originFolder + repoName + '/postgres/release/current/scripts');
+                FileUtils.createFolderIfNotExistsSync(originFolder + repoName + '/postgres/current');
+                let source = this.filesData['version.json'];
+                if (!source) {
+                    source = FileUtils.readFileSync(__dirname + '/../data/database-structure/files/version.json');
+                    this.filesData['version.json'] = source;
+                }
+                console.log(originFolder + repoName + '/postgres/release/current/version.json');
+                FileUtils.writeFileSync(originFolder + repoName + '/postgres/release/current/version.json', source);
+                resolve();
+            }
+        })
     }
 }

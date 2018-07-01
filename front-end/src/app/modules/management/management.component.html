@@ -1,39 +1,77 @@
-<mat-toolbar color="primary" class="mat-elevation-z8">
-  <mat-toolbar-row>
-    <button mat-button routerLink="/">
-      <mat-icon class="example-icon">home</mat-icon>
-    </button>
-    <span>Repo management</span>
-    <button mat-button [matMenuTriggerFor]="menu">{{(management$|async)?.environment}}</button>
-    <mat-menu #menu="matMenu">
-      <button mat-menu-item (click)="onSelecteEnvironment('local')">local</button>
-      <button mat-menu-item (click)="onSelecteEnvironment('dev')">dev</button>
-      <button mat-menu-item (click)="onSelecteEnvironment('demo')">demo</button>
-      <button mat-menu-item (click)="onSelecteEnvironment('prod')">prod</button>
-    </mat-menu>
-    <span class="spacer"></span>
-    <button mat-button routerLink="repositories" *ngIf="(management$|async)?.repositories?.length > 0">
-      <mat-icon class="example-icon">folder</mat-icon>
-    </button>
-    <button mat-button routerLink="databases" *ngIf="(management$|async)?.databases?.length > 0">
-      <mat-icon class="example-icon">storage</mat-icon>
-    </button>
-    <button mat-button routerLink="repositories" (click)="onRunDiscovery()">
-      <mat-icon class="example-icon">youtube_searched_for</mat-icon>
-    </button>
-    <button mat-button routerLink="settings">
-      <mat-icon class="example-icon">settings</mat-icon>
-    </button>
-  </mat-toolbar-row>
-</mat-toolbar>
-<mat-toolbar *ngIf="!(management$|async)?.serverConnected" color="warn">
-  <mat-toolbar-row>
-    <span>Server not connected...</span>
-  </mat-toolbar-row>
-</mat-toolbar>
-<mat-toolbar *ngIf="(management$|async)?.currentDiscoveryStep">
-  <mat-toolbar-row>
-    <span>{{(management$|async)?.currentDiscoveryStep?.stepName}}.</span>
-  </mat-toolbar-row>
-</mat-toolbar>
-<router-outlet></router-outlet>
+<div class="bodyComponent">
+  <mat-toolbar color="primary" class="mat-elevation-z8">
+    <mat-toolbar-row>
+      <button mat-button routerLink="/">
+        <mat-icon class="example-icon">home</mat-icon>
+      </button>
+      <span>Repo management</span>
+      <button mat-button [matMenuTriggerFor]="menu">{{(management$|async)?.environment}}</button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="onSelecteEnvironment('local')">local</button>
+        <button mat-menu-item (click)="onSelecteEnvironment('dev')">dev</button>
+        <button mat-menu-item (click)="onSelecteEnvironment('demo')">demo</button>
+        <button mat-menu-item (click)="onSelecteEnvironment('prod')">prod</button>
+      </mat-menu>
+      <span class="spacer"></span>
+      <button mat-button (click)="onRunDiscovery()">
+        <mat-icon class="example-icon">youtube_searched_for</mat-icon>
+      </button>
+      <button mat-button routerLink="settings">
+        <mat-icon class="example-icon">settings</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+  <mat-toolbar *ngIf="!(management$|async)?.serverConnected" color="warn">
+    <mat-toolbar-row>
+      <span>Server not connected...</span>
+    </mat-toolbar-row>
+  </mat-toolbar>
+  <mat-toolbar *ngIf="(management$|async)?.currentDiscoveryStep">
+    <mat-toolbar-row>
+      <span>{{(management$|async)?.currentDiscoveryStep?.stepName}}.</span>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <mat-drawer-container style="min-height: 500px;">
+    <mat-drawer mode="side" [opened]="(management$|async)?.serverConnected" backgroundColor="accent">
+      <mat-nav-list style="background-color: #e1e1e1;">
+
+        <mat-list-item *ngIf="(management$|async)?.repositories?.length > 0" routerLink="repositories" routerLinkActive="active-link">
+          <button mat-icon-button>
+            <mat-icon>folder</mat-icon>
+          </button>
+          <a matLine>Repositories</a>
+        </mat-list-item>
+
+        <mat-list-item *ngIf="(management$|async)?.databases?.length > 0" (click)="databasesOpen = !databasesOpen">
+          <button mat-icon-button>
+            <mat-icon>storage</mat-icon>
+          </button>
+          <a matLine>Databases</a>
+          <br>
+        </mat-list-item>
+
+        <mat-list-item *ngIf="(management$|async)?.databases?.length > 0 && databasesOpen"
+          style="background-color: #f1f1f1;"
+          routerLink="databases/install"
+          routerLinkActive="active-link">
+          <a matLine>Installation</a>
+          <br>
+        </mat-list-item>
+
+
+        <mat-list-item *ngFor=" let database of (databasesOpen? (management$|async)?.databases : [])"
+          (click)="onSelectDatabase(database)"
+          routerLinkActive="active-link"
+          style="background-color: #f1f1f1;">
+          <a matLine>{{database.name}}</a>
+          <br>
+        </mat-list-item>
+
+      </mat-nav-list>
+    </mat-drawer>
+    <mat-drawer-content>
+      <router-outlet></router-outlet>
+    </mat-drawer-content>
+  </mat-drawer-container>
+</div>

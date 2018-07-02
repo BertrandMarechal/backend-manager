@@ -1,0 +1,9 @@
+<h3>The current installed version is {{currentVersion}}. Please select the new version number</h3>
+<mat-list>
+    <mat-list-item style="cursor: pointer;" *ngFor="let version of databaseVersions; let i = index"
+    [ngStyle]="{'font-weight':selectedId === i ? 'bold':'normal'}"
+        (click)="onSelect(i)"><b>{{version.version}}</b>  - {{version.signification}}</mat-list-item>
+</mat-list>
+<br>
+<button mat-raised-button color="primary" (click)="onConfirm()" [disabled]="selectedId === null">Confirm</button>
+<button mat-raised-button color="accent" (click)="onCancel()">Cancel</button>

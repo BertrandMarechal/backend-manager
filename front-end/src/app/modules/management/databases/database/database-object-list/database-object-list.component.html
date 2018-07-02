@@ -1,9 +1,8 @@
+<h3>The list below is the list of objects that are set up in the previous versions, and not already modified in the new version.</h3>
 <mat-list>
-    <mat-list-item
-      *ngFor="let object of objectList; let i = index"
-      [ngStyle]="{'font-weight':selectedId === i ? 'bold':'normal'}"
-      (click)="onSelect(i)">{{object}}</mat-list-item>
-  </mat-list>
-  <br>
-  <button mat-raised-button color="primary" (click)="onConfirm()" [disabled]="selectedId === null">Confirm</button>
-  <button mat-raised-button color="accent" (click)="onCancel()">Cancel</button>
+    <mat-list-item style="cursor: pointer;" *ngFor="let object of objectList; let i = index" [ngStyle]="{'font-weight':selectedId === i ? 'bold':'normal'}"
+        (click)="onSelect(i)">{{object}}</mat-list-item>
+</mat-list>
+<br>
+<button mat-raised-button color="primary" (click)="onConfirm()" [disabled]="selectedId === null">Confirm</button>
+<button mat-raised-button color="accent" (click)="onCancel()">Cancel</button>

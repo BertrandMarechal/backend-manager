@@ -1,0 +1,21 @@
+{
+  "name": "database-watcher-installer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/body-parser": "^1.17.0",
+    "@types/express": "^4.16.0",
+    "@types/node": "^10.3.4",
+    "@types/socket.io": "^1.4.36",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "pg-promise": "^5.9.7",
+    "socket.io": "^2.1.1"
+  }
+}

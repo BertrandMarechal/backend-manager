@@ -18,19 +18,6 @@ export class DatabaseService {
 
     }
 
-    static getDatabaseFileLists(database: RepositoryFile): {functionFileList: string[], tableFileList: string[]} {
-        const returnObject = {functionFileList: [], tableFileList: []};
-        const fileList = database.databases.reduce((currentX, x) => {
-            return currentX.concat(x.databases.reduce((currentY, y) => {
-                return currentY.concat(y.databaseFiles.map(z => z.filePath));
-            }, []));
-        }, []).filter(x => x.indexOf('/postgres/') > -1);
-
-        returnObject.functionFileList = fileList.filter(x => x.indexOf('07-functions') > -1);
-        returnObject.tableFileList = fileList.filter(x => x.indexOf('03-tables') > -1);
-        return returnObject;
-    }
-
     initializeDatabase(params: {repoName: string, dbAlias: string}): Promise<any> {
         return new Promise((resolve) => {
             this.localhostService.hookCallback('initialize database failed', (data) => {
@@ -78,6 +65,24 @@ export class DatabaseService {
                 'run discovery complete']);
             });
             this.localhostService.socketEmit('prepare update object', params);
+            resolve();
+        });
+    }
+
+    setVersionAsInstalled(params: {repoName: string, versionName: string}): Promise<any> {
+        console.log(params);
+        return new Promise((resolve) => {
+            this.localhostService.hookCallback('set version as installed failed', (data) => {
+                this.store.dispatch(new DatabaseActions.ServicePrepareUpdateObjectFailedAction(data));
+            });
+            this.localhostService.hookCallback('run discovery complete', (data) => {
+                this.storeManagement.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
+                this.store.dispatch(new DatabaseActions.ServiceCreateNewVersionCompleteAction());
+            this.localhostService.removeAllListeners([
+                'set version as installed failed',
+                'run discovery complete']);
+            });
+            this.localhostService.socketEmit('set version as installed', params);
             resolve();
         });
     }

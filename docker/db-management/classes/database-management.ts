@@ -108,9 +108,10 @@ export class DatabaseManagement {
                     if (params.fileName.indexOf('/03-tables/') > -1) {
                         console.log('table');
                         if (params.mode === 'drop') {
+                            fileNamesToAddToVersionJson.push(params.fileName.replace('/postgres/schema/', '/postgres/current/'));
                             console.log('drop');
                             source = 'DROP TABLE IF EXISTS ' + objectName + ';';
-                        } else {
+                        } else if (params.mode === 'update') {
                             console.log('update');
                             // create alter table script
                             const alter = 'ALTER TABLE IF EXISTS ' + objectName + ' add column DUMMY INTEGER;';
@@ -118,11 +119,13 @@ export class DatabaseManagement {
                             fileNamesToAddToVersionJson.push('..//postgres/release/current/scripts/alter_' + objectName + '.sql');
                         }
                     } else if (params.fileName.indexOf('/07-functions/') > -1) {
+                        // if we talk about a function we arerunning the script anyway
+                        fileNamesToAddToVersionJson.push(params.fileName.replace('/postgres/schema/', '/postgres/current/'));
                         console.log('function');
                         if (params.mode === 'drop') {
                             console.log('drop');
                             source = 'DROP FUNCTION IF EXISTS ' + objectName + DatabaseManagement.getFunctionParameters(source) + ';';
-                        } else {
+                        } else if (params.mode === 'update') {
                             console.log('update');
                             source = 'DROP FUNCTION IF EXISTS ' + objectName + DatabaseManagement.getFunctionParameters(source) + ';\r\n'
                                 + source;
@@ -131,7 +134,6 @@ export class DatabaseManagement {
                     // copy to current
                     console.log('copy to current');
                     FileUtils.writeFileSync(originFolder + params.repoName + '/postgres/' + params.fileName.replace('/postgres/schema/', 'postgres/current/'), source);
-                    fileNamesToAddToVersionJson.push(params.fileName.replace('/postgres/schema/', '/postgres/current/'));
                     // update version.json
                     console.log('update version.json');
 
@@ -176,5 +178,69 @@ export class DatabaseManagement {
             return '';
         }
         return '(' + types.join(',') + ')';
+    }
+
+    setVersionAsInstalled(params: {repoName: string, versionName: string}): Promise<any> {
+        return new Promise((resolve, reject) => {
+            // rename release/current as release/versionName
+            console.log('rename release/current as release/versionName');
+            FileUtils.renameFolder(
+                originFolder + params.repoName + '/postgres/release/current',
+                originFolder + params.repoName + '/postgres/release/' + params.versionName)
+                .then(() => {
+                    // get the files from current
+                    console.log('get the files from current');
+                    FileUtils.getFileList({
+                        startPath: originFolder + params.repoName + '/postgres/current',
+                        filter: /.sql/
+                    })
+                        .then((fileList: string[]) => {
+                            // put them in a schema_changes folder under the current version
+                            console.log('put them in a schema_changes folder under the current version');
+                            for (let i = 0; i < fileList.length; i++) {
+                                const fileName = fileList[i];
+                                FileUtils.copyFileSync(
+                                    fileName,
+                                    fileName.replace('postgres/current', 'postgres/release/' + params.versionName + '/schema_changes')
+                                );
+                            }
+                            // ovewrite the schema ones
+                            console.log('ovewrite the schema ones');
+                            for (let i = 0; i < fileList.length; i++) {
+                                const fileName = fileList[i];
+                                FileUtils.copyFileSync(
+                                    fileName,
+                                    fileName.replace('postgres/current', 'postgres/schema')
+                                );
+                            }
+                            // update version.json
+                            console.log('update version.json');
+                            FileUtils.readJsonFile(originFolder + params.repoName + '/postgres/release/' + params.versionName + '/version.json')
+                                .then((data) => {
+                                    const updatedData = data.map((x: any) => {
+                                        return {
+                                            ...x,
+                                            fileList: x.fileList.map((y: string) => y.replace('postgres/current','postgres/release/' + params.versionName + '/schema_changes'))
+                                        }
+                                    });
+                                    FileUtils.writeFileSync(originFolder + params.repoName + '/postgres/release/' + params.versionName + '/version.json', JSON.stringify(updatedData));
+                                    // delete the files
+                                    console.log('delete the files');
+                                    for (let i = 0; i < fileList.length; i++) {
+                                        const fileName = fileList[i];
+                                        FileUtils.deleteFileSync(
+                                            fileName
+                                        );
+                                    }
+                                    FileUtils.deleteFolderRecursiveSync(originFolder + params.repoName + '/postgres/current');
+                                    resolve();
+                                })
+                                .catch(reject);
+                        })
+                        .catch(reject);
+                })
+                .catch(reject);
+
+        });
     }
 }

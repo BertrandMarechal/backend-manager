@@ -34,6 +34,7 @@ import { DatabaseService } from './services/database.service';
 import { DatabaseTableEditComponent } from './modules/management/databases/database/database-table-edit/database-table-edit.component';
 import { DatabaseFunctionEditComponent } from './modules/management/databases/database/database-function-edit/database-function-edit.component';
 import { DatabaseObjectListComponent } from './modules/management/databases/database/database-object-list/database-object-list.component';
+import { DatabaseVersionInstalledComponent } from './modules/management/databases/database/database-version-installed/database-version-installed.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { DatabaseObjectListComponent } from './modules/management/databases/data
     DatabaseTableEditComponent,
     DatabaseFunctionEditComponent,
     DatabaseObjectListComponent,
+    DatabaseVersionInstalledComponent,
   ],
   imports: [
     BrowserModule,

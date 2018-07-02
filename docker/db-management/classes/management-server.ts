@@ -7,7 +7,6 @@ import { PostgresUtils } from '../utils/postgres.utils';
 import { FileUtils } from '../utils/file.utils';
 import { DatabaseManagement } from './database-management';
 import { RepositoryReader } from './repository-reader';
-import { log } from 'util';
 import { Setting } from '../models/settings.model';
 
 
@@ -54,15 +53,25 @@ export class ManagementServer {
 
         this.declareRoutes();
         if (process.argv[2]) {
-            this.runDatabaseInitializationSctipt();
+            this.runDatabaseInitializationSctipt()
+            .then(() => {
+                this.server.listen(process.argv[2] ? 690 : 8080, (error: any) => {
+                    console.log('listening');
+                });
+            })
+            .catch((error) => {
+                console.log(error);
+                
+            });
+        } else {
+            this.server.listen(process.argv[2] ? 690 : 8080, (error: any) => {
+                console.log('listening');
+            });
         }
-        this.server.listen(process.argv[2] ? 690 : 8080, (error: any) => {
-            console.log('listening');
-        });
 
     }
 
-    private runDatabaseInitializationSctipt() {
+    private runDatabaseInitializationSctipt(): Promise<any> {
         console.log('This step is made to run the SQL scripts on starting the ser on local use.');
         console.log('WAIT FOR IT TO END before doing anything.');
         console.log('REMOVE it on real use case.');
@@ -74,7 +83,6 @@ export class ManagementServer {
             })
                 .then((fileList) => {
                     console.log(fileList.length + ' files to run');
-
                     this.runFiles(fileList)
                         .then(resolve)
                         .catch(reject);
@@ -92,7 +100,7 @@ export class ManagementServer {
                         this.postgresUtils.execute(command)
                             .then(() => {
                                 fileList.splice(0, 1);
-                                return this.runFiles(fileList);
+                                return this.runFiles(fileList).then(resolve).catch(reject);
                             })
                             .catch(() => {
                                 reject();
@@ -310,6 +318,28 @@ export class ManagementServer {
                 })
                 .catch((error) => {
                     this.client.emit('prepare update object failed', error);
+                });
+        });
+        this.client.on('set version as installed', (params: {repoName: string, versionName: string}) => {
+            console.log('set version as installed');
+            this.databaseManagement.setVersionAsInstalled(params)
+                .then((x: any) => {
+                    this.repositoryReader.getRepoDatabaseFiles(params.repoName)
+                        .then(() => {
+                            this.repositoryReader.geRepositoryData()
+                                .then((data: any) => {
+                                    this.client.emit('run discovery complete', data);
+                                })
+                                .catch((error) => {
+                                    this.client.emit('set version as installed failed', error);
+                                })
+                        })
+                        .catch((error) => {
+                            this.client.emit('set version as installed failed', error);
+                        })
+                })
+                .catch((error) => {
+                    this.client.emit('set version as installed failed', error);
                 });
         });
     }

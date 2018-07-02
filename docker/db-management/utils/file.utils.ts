@@ -103,7 +103,6 @@ export class FileUtils {
 
     static writeFileSync(fileName: string, content: string) {
         console.log('Creating ' + fileName);
-        
         FileUtils.createFolderStructureIfNeeded(fileName);
         fs.writeFileSync(fileName, content);
     }
@@ -139,4 +138,47 @@ export class FileUtils {
             FileUtils.createFolderStructureIfNeeded(path, depth + 1);
         }
     }
+
+    static renameFolder(from: string, to: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            fs.rename(from, to, (error) => {
+                if (error) {
+                    console.log(error);
+                    
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            })
+        })
+    }
+
+    static copyFileSync(from: string, to: string) {
+        const source = FileUtils.readFileSync(from);
+        FileUtils.writeFileSync(to, source);
+    }
+
+    static deleteFileSync(fileName: string) {
+        console.log('Deleting ' + fileName);
+        
+        fs.unlinkSync(fileName);
+    }
+
+    
+    static deleteFolderRecursiveSync(path: string, sub: boolean = false) {
+        if (!sub) {
+            console.log('Deleting ' + path);
+        }
+        if (fs.existsSync(path)) {
+            fs.readdirSync(path).forEach((file) => {
+                const curPath = path + "/" + file;
+                if (fs.lstatSync(curPath).isDirectory()) { // recurse
+                    FileUtils.deleteFolderRecursiveSync(curPath, true);
+                } else { // delete file
+                    fs.unlinkSync(curPath);
+                }
+            });
+            fs.rmdirSync(path);
+        }
+    };
 }

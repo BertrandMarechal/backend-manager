@@ -42,7 +42,7 @@ export class DatabaseEffects {
   createNewVersion: Observable<Action> = this.actions$
     .ofType(DatabaseActions.CREATE_NEW_VERSION_PAGE)
     .pipe(
-      switchMap((action: DatabaseActions.CreateNewVersionPageAction) => {
+      switchMap((action: DatabaseActions.CreateNewVersionPageAction) => {        
         return fromPromise(
           this.databaseService.createNewDatabaseVersion(action.payload)
         ).pipe(
@@ -89,6 +89,38 @@ export class DatabaseEffects {
             return [
               {
                 type: DatabaseActions.SERVICE_PREPARE_UPDATE_OBJECT_FAILED,
+                payload: error.message
+              },
+            ];
+          })
+        );
+      })
+    );
+  @Effect()
+  setVersionAsInstalled: Observable<Action> = this.actions$
+    .ofType(DatabaseActions.SET_VERSION_AS_INSTALLED_PAGE_ACTION)
+    .pipe(
+      withLatestFrom(this.store.select('databaseManagement')),
+      switchMap(([action, state]: any[]) => {
+        console.log(action, state);
+        return fromPromise(
+          this.databaseService.setVersionAsInstalled({
+            ...action.payload,
+            repoName: state.selectedDatabase.name
+          })
+        ).pipe(
+          mergeMap((data: any) => {
+            return [
+              {
+                type: DatabaseActions.DATABASE_NOTHING_ACTION,
+                payload: data
+              },
+            ];
+          }),
+          catchError((error) => {
+            return [
+              {
+                type: DatabaseActions.SERVICE_SET_VERSION_AS_INSTALLED_FAILED,
                 payload: error.message
               },
             ];

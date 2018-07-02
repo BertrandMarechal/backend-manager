@@ -58,6 +58,23 @@ readonly type  = SERVICE_PREPARE_UPDATE_OBJECT_FAILED;
 constructor(public payload?: string) {}
 }
 
+export const SET_VERSION_AS_INSTALLED_PAGE_ACTION = '[Database Page] SET_VERSION_AS_INSTALLED';
+export const SERVICE_SET_VERSION_AS_INSTALLED_COMPLETE = '[Database Service] SET_VERSION_AS_INSTALLED complete';
+export const SERVICE_SET_VERSION_AS_INSTALLED_FAILED = '[Database Service] SET_VERSION_AS_INSTALLED failed';
+
+export class SetVersionAsInstalledPageAction implements Action {
+readonly type  = SET_VERSION_AS_INSTALLED_PAGE_ACTION;
+constructor(public payload?: {versionName: string}) {}
+}
+export class ServiceSetVersionAsInstalledCompleteAction implements Action {
+readonly type  = SERVICE_SET_VERSION_AS_INSTALLED_COMPLETE;
+constructor(public payload?: any) {}
+}
+export class ServiceSetVersionAsInstalledFailedAction implements Action {
+readonly type  = SERVICE_SET_VERSION_AS_INSTALLED_FAILED;
+constructor(public payload?: string) {}
+}
+
 export const SELECT_DATABASE_PAGE_ACTION =
   '[Databases Page] select database';
 export class SelecteDatabasePageAction implements Action {
@@ -88,6 +105,9 @@ export type DatabaseActions =
   | PrepareUpdateObjectPageAction
   | ServicePrepareUpdateObjectCompleteAction
   | ServicePrepareUpdateObjectFailedAction
+  | SetVersionAsInstalledPageAction
+  | ServiceSetVersionAsInstalledCompleteAction
+  | ServiceSetVersionAsInstalledFailedAction
   | SelecteDatabasePageAction
   | FilterDatabaseFilesPageAction
   | DatabaseNothingAction;

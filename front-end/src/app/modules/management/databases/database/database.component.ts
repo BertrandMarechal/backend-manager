@@ -54,9 +54,12 @@ export class DatabaseComponent implements OnInit {
   }
 
   public onUpdateObject(params: {fileName: string, mode: string, repoName: string}): void {
-    console.log(params);
-    
     this.store.dispatch(new DatabaseActions.PrepareUpdateObjectPageAction(params));
+  }
+
+  public onSetVersionAsInstalled(versionName: string): void {
+    console.log(versionName);
+    this.store.dispatch(new DatabaseActions.SetVersionAsInstalledPageAction({versionName: versionName}));
   }
 
   closeSwal() {

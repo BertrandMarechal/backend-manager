@@ -1,6 +1,6 @@
 import { AppState } from './app.reducers';
 import * as DatabaseActions from '../actions/database.actions';
-import { RepositoryFile } from '../../models/database.model';
+import { RepositoryFile, DatabaseInformation } from '../../models/database.model';
 import { DatabaseService } from '../../services/database.service';
 
 export interface FeatureState extends AppState {
@@ -17,6 +17,8 @@ export interface State {
   hasCurrentFolder: boolean;
   functionFileList: string[];
   tableFileList: string[];
+
+  selectedDatabaseInformation: DatabaseInformation;
 }
 
 export const initialState: State = {
@@ -29,6 +31,7 @@ export const initialState: State = {
   hasCurrentFolder: false,
   functionFileList: [],
   tableFileList: [],
+  selectedDatabaseInformation: new DatabaseInformation(),
 };
 
 export function databaseReducers(state = initialState, action: DatabaseActions.DatabaseActions) {
@@ -36,23 +39,15 @@ export function databaseReducers(state = initialState, action: DatabaseActions.D
   switch (action.type) {
     case DatabaseActions.DATABASE_REPOSITORIES_UPDATED:
       let selectedDatabase: RepositoryFile = null;
-      let canCreateNewVersion = false;
-      let hasCurrentFolder = false;
       if (state.selectedDatabase) {
         selectedDatabase = (action.payload || [])
           .filter(x => x.isDatabase && x.name === state.selectedDatabase.name)[0];
-        hasCurrentFolder = selectedDatabase.databases &&
-          selectedDatabase.databases.filter(x => x.version === 'current').length > 0;
-        canCreateNewVersion = selectedDatabase.databases &&
-          selectedDatabase.databases.length > 0 &&
-          !hasCurrentFolder;
       }
       return {
         ...state,
         databases: (action.payload || []).filter(x => x.isDatabase),
         selectedDatabase: selectedDatabase,
-        canCreateNewVersion: canCreateNewVersion,
-        hasCurrentFolder: hasCurrentFolder
+        selectedDatabaseInformation: state.selectedDatabaseInformation.processDatabaseData(selectedDatabase)
       };
     case DatabaseActions.INITIALIZE_DATABASE_PAGE:
       return {
@@ -80,12 +75,7 @@ export function databaseReducers(state = initialState, action: DatabaseActions.D
       return {
         ...state,
         selectedDatabase: action.payload,
-        hasCurrentFolder: action.payload.databases &&
-          action.payload.databases.filter(x => x.version === 'current').length > 0,
-        canCreateNewVersion: action.payload.databases &&
-          action.payload.databases.length > 0 &&
-          action.payload.databases.filter(x => x.version === 'current').length === 0,
-        ...DatabaseService.getDatabaseFileLists(action.payload),
+        selectedDatabaseInformation: state.selectedDatabaseInformation.processDatabaseData(action.payload)
       };
     case DatabaseActions.FILTER_DATABASE_FILES_PAGE_ACTION:
       let files = [];

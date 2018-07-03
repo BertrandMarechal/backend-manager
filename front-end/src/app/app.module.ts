@@ -16,7 +16,7 @@ import { StoreRouterConnectingModule } from '@ngrx/router-store';
 import { appRouting } from './app.routing';
 import { MaterialModule } from './modules/material/material.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SettingsEditComponent } from './modules/management/settings-edit/settings-edit.component';
 import { SweetAlert2Module } from '@toverux/ngx-sweetalert2';
 import { HomeComponent } from './modules/management/home/home.component';
@@ -73,6 +73,7 @@ import { DatabaseVersionInstalledComponent } from './modules/management/database
       DatabaseEffects
     ]),
     MaterialModule,
+    ReactiveFormsModule,
   ],
   providers: [LocalhostService, ManagementService, DatabaseService],
   bootstrap: [AppComponent]

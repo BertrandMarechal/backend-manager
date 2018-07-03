@@ -11,34 +11,6 @@
     </mat-expansion-panel-header>
 
     <mat-accordion>
-      <mat-expansion-panel class="example-headers-align" hideToggle>
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <b>Settings</b>
-          </mat-panel-title>
-          <mat-panel-description>
-            Database settings {{(database.parameters|databaseParametersNotSet)}}
-            <mat-chip-list>
-              <mat-chip *ngIf="(database.parameters|databaseParametersNotSet) > 0">{{database.parameters|databaseParametersNotSet}} params not set</mat-chip>
-            </mat-chip-list>
-            <mat-icon>settings</mat-icon>
-          </mat-panel-description>
-        </mat-expansion-panel-header>
-        <table>
-          <tr *ngFor="let parameter of database.parameters">
-            <td>{{parameter.name}}</td>
-            <td style="padding-left: 20px">
-              <mat-form-field class="example-full-width">
-                <input matInput [placeholder]="parameter.name" value="Whatever">
-              </mat-form-field>
-            </td>
-          </tr>
-        </table>
-        <mat-action-row>
-          <button mat-button color="primary" (click)="onSaveParameters()">Save</button>
-        </mat-action-row>
-      </mat-expansion-panel>
-
       <mat-expansion-panel *ngFor="let db of database.databases" class="example-headers-align" hideToggle>
         <mat-expansion-panel-header>
           <mat-panel-title>

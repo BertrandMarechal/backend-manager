@@ -16,6 +16,7 @@ export class ManagementComponent implements OnInit {
   management$: Observable<fromManagement.State>;
   databases$: Observable<fromDatabase.State>;
   databasesOpen: boolean;
+  navbarOpen: boolean;
 
   constructor(
     private store: Store<fromManagement.State>,

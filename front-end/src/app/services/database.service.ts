@@ -18,7 +18,7 @@ export class DatabaseService {
 
     }
 
-    initializeDatabase(params: {repoName: string, dbAlias: string}): Promise<any> {
+    initializeDatabase(params: { repoName: string, dbAlias: string }): Promise<any> {
         return new Promise((resolve) => {
             this.localhostService.hookCallback('initialize database failed', (data) => {
                 this.store.dispatch(new DatabaseActions.ServiceInitializeDatabaseFailedAction(data));
@@ -26,9 +26,9 @@ export class DatabaseService {
             this.localhostService.hookCallback('run discovery complete', (data) => {
                 this.storeManagement.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
                 this.store.dispatch(new DatabaseActions.ServiceInitializeDatabaseCompleteAction());
-            this.localhostService.removeAllListeners([
-                'initialize database failed',
-                'run discovery complete']);
+                this.localhostService.removeAllListeners([
+                    'initialize database failed',
+                    'run discovery complete']);
             });
             this.localhostService.socketEmit('initialize database', params);
             resolve();
@@ -43,16 +43,16 @@ export class DatabaseService {
             this.localhostService.hookCallback('run discovery complete', (data) => {
                 this.storeManagement.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
                 this.store.dispatch(new DatabaseActions.ServiceCreateNewVersionCompleteAction());
-            this.localhostService.removeAllListeners([
-                'create database version failed',
-                'run discovery complete']);
+                this.localhostService.removeAllListeners([
+                    'create database version failed',
+                    'run discovery complete']);
             });
             this.localhostService.socketEmit('create database version', repoName);
             resolve();
         });
     }
 
-    prepareUpdateObject(params: {repoName: string, fileName: string, mode: string}): Promise<any> {
+    prepareUpdateObject(params: { repoName: string, fileName: string, mode: string }): Promise<any> {
         return new Promise((resolve) => {
             this.localhostService.hookCallback('prepare update object failed', (data) => {
                 this.store.dispatch(new DatabaseActions.ServicePrepareUpdateObjectFailedAction(data));
@@ -60,16 +60,16 @@ export class DatabaseService {
             this.localhostService.hookCallback('run discovery complete', (data) => {
                 this.storeManagement.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
                 this.store.dispatch(new DatabaseActions.ServiceCreateNewVersionCompleteAction());
-            this.localhostService.removeAllListeners([
-                'prepare update object failed',
-                'run discovery complete']);
+                this.localhostService.removeAllListeners([
+                    'prepare update object failed',
+                    'run discovery complete']);
             });
             this.localhostService.socketEmit('prepare update object', params);
             resolve();
         });
     }
 
-    setVersionAsInstalled(params: {repoName: string, versionName: string}): Promise<any> {
+    setVersionAsInstalled(params: { repoName: string, versionName: string }): Promise<any> {
         console.log(params);
         return new Promise((resolve) => {
             this.localhostService.hookCallback('set version as installed failed', (data) => {
@@ -78,11 +78,37 @@ export class DatabaseService {
             this.localhostService.hookCallback('run discovery complete', (data) => {
                 this.storeManagement.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
                 this.store.dispatch(new DatabaseActions.ServiceCreateNewVersionCompleteAction());
-            this.localhostService.removeAllListeners([
-                'set version as installed failed',
-                'run discovery complete']);
+                this.localhostService.removeAllListeners([
+                    'set version as installed failed',
+                    'run discovery complete']);
             });
             this.localhostService.socketEmit('set version as installed', params);
+            resolve();
+        });
+    }
+
+    updateSetting(data: { settingName: string, settingValue: string, repoName: string, environment: string }): Promise<any> {
+        return <Promise<any>>this.localhostService.post('database/setting/update', data);
+    }
+
+    installDatabase(params: { repoName: string, version?: string, user?: string, fileName?: string }): Promise<any> {
+        return new Promise((resolve) => {
+            this.localhostService.hookCallback('install database progress', (data) => {
+                this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseProgressAction(data));
+            });
+            this.localhostService.hookCallback('install database failed', (data) => {
+                this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseFailedAction(data));
+            });
+            this.localhostService.hookCallback('install database complete', (data) => {
+                console.log(data);
+                this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseCompleteAction(data));
+                this.localhostService.removeAllListeners([
+                    'install database progress',
+                    'install database failed',
+                    'install database complete']);
+            });
+
+            this.localhostService.socketEmit('install database', params);
             resolve();
         });
     }

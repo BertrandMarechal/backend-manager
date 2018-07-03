@@ -1,6 +1,6 @@
 import { AppState } from './app.reducers';
 import * as DatabaseActions from '../actions/database.actions';
-import { RepositoryFile, DatabaseInformation } from '../../models/database.model';
+import { RepositoryFile, DatabaseInformation, DatabaseInstallationProgress } from '../../models/database.model';
 import { DatabaseService } from '../../services/database.service';
 
 export interface FeatureState extends AppState {
@@ -19,6 +19,11 @@ export interface State {
   tableFileList: string[];
 
   selectedDatabaseInformation: DatabaseInformation;
+  updatingSetting: { settingName: string, settingValue: string, environment: string, done: boolean };
+
+  installingDatabase: boolean;
+  installationProgress: number;
+  installationProgressArray: DatabaseInstallationProgress[];
 }
 
 export const initialState: State = {
@@ -32,10 +37,13 @@ export const initialState: State = {
   functionFileList: [],
   tableFileList: [],
   selectedDatabaseInformation: new DatabaseInformation(),
+  updatingSetting: null,
+  installingDatabase: false,
+  installationProgress: 0,
+  installationProgressArray: [],
 };
 
 export function databaseReducers(state = initialState, action: DatabaseActions.DatabaseActions) {
-
   switch (action.type) {
     case DatabaseActions.DATABASE_REPOSITORIES_UPDATED:
       let selectedDatabase: RepositoryFile = null;
@@ -96,6 +104,64 @@ export function databaseReducers(state = initialState, action: DatabaseActions.D
       return {
         ...state,
         filteredDatabaseFiles: files
+      };
+    case DatabaseActions.SAVE_SETTING_PAGE:
+      return {
+        ...state,
+        updatingSetting: {
+          ...action.payload,
+          done: false
+        }
+      };
+    case DatabaseActions.SERVICE_SAVE_SETTING_COMPLETE:
+      return {
+        ...state,
+        updatingSetting: {
+          ...state.updatingSetting,
+          done: true
+        }
+      };
+    case DatabaseActions.SERVICE_SAVE_SETTING_FAILED:
+    case DatabaseActions.SERVICE_SAVE_SETTING_UPDATING_WIPE:
+      return {
+        ...state,
+        updatingSetting: null
+      };
+    case DatabaseActions.INSTALL_DATABASES_PAGE_ACTION:
+      return {
+        ...state,
+        installingDatabase: true,
+        installationProgress: 0,
+        installationProgressArray: []
+      };
+    case DatabaseActions.SERVICE_INSTALL_DATABASES_PROGRESS:
+      const sidpProgressArray: DatabaseInstallationProgress[] = action.payload
+        .map(x => new DatabaseInstallationProgress(x));
+      const totalSidbProgress = sidpProgressArray.reduce((current, x) => {
+        current.total += 100;
+        current.done += x.progress || 0;
+        current.progress = (current.done > 0 ? Math.floor(100 * current.done / current.total) : 0);
+        return current;
+      }, { total: 0, done: 0, progress: 0 }).progress;
+      return {
+        ...state,
+        installingDatabase: true,
+        installationProgressArray: sidpProgressArray,
+        installationProgress: totalSidbProgress
+      };
+    case DatabaseActions.SERVICE_INSTALL_DATABASES_COMPLETE:
+      const sidcProgressArray: DatabaseInstallationProgress[] = action.payload
+        .map(x => new DatabaseInstallationProgress(x));
+      return {
+        ...state,
+        installingDatabase: false,
+        installationProgressArray: sidcProgressArray,
+        installationProgress: 100
+      };
+    case DatabaseActions.SERVICE_INSTALL_DATABASES_FAILED:
+      return {
+        ...state,
+        installingDatabase: false
       };
     default:
       return state;

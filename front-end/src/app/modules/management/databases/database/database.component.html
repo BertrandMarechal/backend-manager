@@ -45,6 +45,9 @@
         Initialize
       </button>
   </mat-card-content>
+  <mat-card-content *ngIf="(database$|async)?.selectedDatabase.databases?.length > 0">
+    <app-database-parameters [environment]="(management$|async)?.environment" [parameters]="(database$|async)?.selectedDatabase?.parameters[(management$|async)?.environment]"></app-database-parameters>
+  </mat-card-content>
   <mat-card-content *ngIf="(database$|async)?.selectedDatabase.databases?.length > 0 && (database$|async)?.selectedDatabaseInformation.hasCurrentFolder">
     <br>
     <mat-form-field>

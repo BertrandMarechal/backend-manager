@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import * as fromDatabase from '../../../../store/reducers/database.reducers';
+import * as fromManagement from '../../../../store/reducers/management.reducers';
 import * as DatabaseActions from '../../../../store/actions/database.actions';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -12,6 +13,7 @@ import swal from 'sweetalert2';
 })
 export class DatabaseComponent implements OnInit {
   database$: Observable<fromDatabase.State>;
+  management$: Observable<fromManagement.State>;
   filter: string;
   dbAlias: string;
 
@@ -21,7 +23,7 @@ export class DatabaseComponent implements OnInit {
 
   ngOnInit() {
     this.database$ = this.store.select('databaseManagement');
-    console.log('DatabaseComponent');
+    this.management$ = this.store.select('management');
   }
 
   onFilter(filter: string) {

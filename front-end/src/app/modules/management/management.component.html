@@ -1,16 +1,13 @@
 <div class="bodyComponent">
   <mat-toolbar color="primary" class="mat-elevation-z8">
     <mat-toolbar-row>
-      <button mat-button routerLink="/">
-        <mat-icon class="example-icon">home</mat-icon>
-      </button>
+      <mat-icon class="example-icon" style="cursor: pointer; margin-right: 10px;" routerLink="/">
+        home
+      </mat-icon>
       <span>Repo management</span>
-      <button mat-button [matMenuTriggerFor]="menu">{{(management$|async)?.environment}}</button>
+      <button mat-button [matMenuTriggerFor]="menu"  *ngIf="!(management$|async)?.gettingEnvironments">{{(management$|async)?.environment}}</button>
       <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="onSelecteEnvironment('local')">local</button>
-        <button mat-menu-item (click)="onSelecteEnvironment('dev')">dev</button>
-        <button mat-menu-item (click)="onSelecteEnvironment('demo')">demo</button>
-        <button mat-menu-item (click)="onSelecteEnvironment('prod')">prod</button>
+        <button mat-menu-item (click)="onSelecteEnvironment(environment.environmentName)" *ngFor="let environment of (management$|async)?.environments">{{environment.environmentName}}</button>
       </mat-menu>
       <span class="spacer"></span>
       <button mat-button (click)="onRunDiscovery()">
@@ -31,7 +28,6 @@
       <span>{{(management$|async)?.currentDiscoveryStep?.stepName}}.</span>
     </mat-toolbar-row>
   </mat-toolbar>
-
   <mat-drawer-container style="min-height: 500px;">
     <mat-drawer mode="side" [opened]="(management$|async)?.serverConnected" backgroundColor="accent">
       <mat-nav-list style="background-color: #e1e1e1;">
@@ -51,19 +47,15 @@
           <br>
         </mat-list-item>
 
-        <mat-list-item *ngIf="(management$|async)?.hasDatabases && databasesOpen"
-          style="background-color: #f1f1f1;"
-          routerLink="databases/install"
+        <mat-list-item *ngIf="(management$|async)?.hasDatabases && databasesOpen" style="background-color: #f1f1f1;" routerLink="databases/install"
           routerLinkActive="active-link">
           <a matLine>Installation</a>
           <br>
         </mat-list-item>
 
 
-        <mat-list-item *ngFor=" let database of (databasesOpen? (databases$|async)?.databases : [])"
-          (click)="onSelectDatabase(database)"
-          routerLinkActive="active-link"
-          style="background-color: #f1f1f1;">
+        <mat-list-item *ngFor=" let database of (databasesOpen? (databases$|async)?.databases : [])" (click)="onSelectDatabase(database)"
+          routerLinkActive="active-link" style="background-color: #f1f1f1;">
           <a matLine>{{database.name}}</a>
           <br>
         </mat-list-item>

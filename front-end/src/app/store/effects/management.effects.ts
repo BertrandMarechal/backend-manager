@@ -111,6 +111,35 @@ export class ManagementEffects {
   );
 
   @Effect()
+  getEnvironments: Observable<Action> = this.actions$
+    .ofType(ManagementActions.GET_ENVIRONMENTS_INIT)
+    .pipe(
+      switchMap((action: ManagementActions.GetEnvironmentsInitAction) => {
+        return fromPromise(
+          this.managementService.getEnvironments(),
+        ).pipe(
+          mergeMap((data: { data: { environmentName: string }[] }) => {
+            return [
+              {
+                type: ManagementActions.SERVICE_GET_ENVIRONMENTS_COMPLETE,
+                payload: data.data,
+              },
+            ];
+          }),
+          catchError(error => {
+            console.log(error);
+            return [
+              {
+                type: ManagementActions.SERVICE_GET_ENVIRONMENTS_FAILED,
+                payload: error.message,
+              },
+            ];
+          }),
+        );
+      }),
+  );
+
+  @Effect()
   updateSettings: Observable<Action> = this.actions$
     .ofType(ManagementActions.PAGE_UPDATE_SETTINGS)
     .pipe(
@@ -131,7 +160,7 @@ export class ManagementEffects {
             toast({
               type: 'success',
               title: 'Settings saved'
-            })
+            });
             return [
               {
                 type: ManagementActions.SERVICE_UPDATE_SETTINGS_COMPLETE,

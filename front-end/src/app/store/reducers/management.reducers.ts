@@ -17,6 +17,8 @@ export interface State {
     serverConnected: boolean;
     currentDiscoveryStep: { stepName: string, complete: boolean };
     environment: string;
+    environments: {environmentName: string}[];
+    gettingEnvironments: boolean;
     hasDatabases: boolean;
     hasMiddleTiers: boolean;
 }
@@ -31,6 +33,8 @@ export const initialState: State = {
     serverConnected: false,
     currentDiscoveryStep: null,
     environment: 'local',
+    environments: [],
+    gettingEnvironments: false,
     hasDatabases: false,
     hasMiddleTiers: false,
 };
@@ -53,6 +57,22 @@ export function managementeReducers(state = initialState, action: ManagementActi
             return {
                 ...state,
                 gettingSettings: false
+            };
+        case ManagementActions.GET_ENVIRONMENTS_INIT:
+            return {
+                ...state,
+                gettingEnvironments: true
+            };
+        case ManagementActions.SERVICE_GET_ENVIRONMENTS_COMPLETE:
+            return {
+                ...state,
+                gettingEnvironments: false,
+                environments: action.payload
+            };
+        case ManagementActions.SERVICE_GET_ENVIRONMENTS_FAILED:
+            return {
+                ...state,
+                gettingEnvironments: false
             };
         case ManagementActions.PAGE_UPDATE_SETTINGS:
             return {

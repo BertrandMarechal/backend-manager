@@ -145,6 +145,18 @@ export class ManagementServer {
                     res.send({ error: error });
                 });
         });
+        this.app.post('/database/setting/update', (req: any, res: any) => {
+            console.log('/database/setting/update');
+            const body: {settingName: string, settingValue: string, repoName: string, environment: string} = req.body;
+            this.databaseManagement
+                .execute('mgtf_set_database_environment_setting', [body.repoName, body.environment, body.settingName, body.settingValue])
+                .then(() => {
+                    res.send({ error: null, data: body });
+                }).catch((error) => {
+                    console.log(error);
+                    res.send({ error: error });
+                });
+        });
         this.app.get('/databases', (req: any, res: any) => {
             console.log('/databases');
             if (this.repositories) {
@@ -170,24 +182,13 @@ export class ManagementServer {
             this.databaseManagement.createDatabaseFolderStructure(req.params.repo, req.params.dbalias)
                 .then((x: any) => ManagementServer.sendDataBack(x, res))
                 .catch((x: any) => ManagementServer.sendErrorBack(x, res));
+        });
 
-            // if (this.repositories) {
-            //     Promise.all(this.repositories
-            //         .filter(x => x.isDatabase)
-            //         .map(x => FileUtils.getFileList({
-            //             filter: /version\.json/,
-            //             startPath: '../repos/' + x.name,
-            //             foldersToIgnore: ['typescript']
-            //         })))
-            //         .then((data) => {
-            //             this.databases = data;
-            //             res.send({ data: data });
-            //         }).catch((error) => {
-            //             res.send({ error: error });
-            //         });
-            // } else {
-            //     res.send({ error: 'No repos yet. Please go to http://localhost:690/repositories' });
-            // }
+        this.app.get('/environments', (req: any, res: any) => {
+            console.log('/environments');
+            this.postgresUtils.executeFunction('mgtf_get_environments')
+                .then(x => ManagementServer.sendDataBack(x, res))
+                .catch(x => ManagementServer.sendErrorBack(x, res));
         });
         this.app.get('/repositories', (req: any, res: any) => {
             console.log('/repositories');
@@ -253,6 +254,7 @@ export class ManagementServer {
                     this.client.emit('run discovery failed', error);
                 });
         });
+        
         this.client.on('initialize database', (params: { repoName: string, dbAlias: string }) => {
             console.log('initialize database');
             this.databaseManagement.createDatabaseFolderStructure(params.repoName, params.dbAlias)
@@ -273,6 +275,33 @@ export class ManagementServer {
                 })
                 .catch((error) => {
                     this.client.emit('initialize database failed', error);
+                });
+
+        });
+
+        this.client.on('install database', (params: {settingName: string, settingValue: string, repoName: string, environment: string}) => {
+            console.log('install database');
+            this.databaseManagement.getInstallationTree(params)
+                .then((data: any) => {
+                    // console.log(data);
+                    
+                    // this.repositoryReader.getRepoDatabaseFiles(params.repoName)
+                    //     .then((data) => {
+                            this.client.emit('install database complete', data);
+                        //     this.repositoryReader.geRepositoryData()
+                        //         .then((data: any) => {
+                        //             this.client.emit('install database complete', data);
+                        //         })
+                        //         .catch((error) => {
+                        //             this.client.emit('install database failed', error);
+                        //         })
+                        // })
+                        // .catch((error) => {
+                        //     this.client.emit('install database failed', error);
+                        // })
+                })
+                .catch((error) => {
+                    this.client.emit('install database failed', error);
                 });
 
         });

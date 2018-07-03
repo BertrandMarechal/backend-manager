@@ -12,9 +12,15 @@ interface FolderStructureItem {
 export class DatabaseManagement {
     postgresUtils: PostgresUtils;
     filesData: { [name: string]: string };
+    scriptsToRunAndDatabase: {database: string, fileName: string}[];
+    currentScriptId: number;
+    currentSettings: {key: string, value: string}[];
 
     constructor() {
         this.filesData = {};
+        this.scriptsToRunAndDatabase = [];
+        this.currentSettings = [];
+        this.currentScriptId = -1;
         this.postgresUtils = new PostgresUtils();
         this.postgresUtils.setConnectionString(process.argv[2] ? 'postgres://root:route@localhost:5432/postgres' : 'postgres://root:route@postgresdb:5432/postgres')
     }
@@ -241,6 +247,51 @@ export class DatabaseManagement {
                 })
                 .catch(reject);
 
+        });
+    }
+
+    runScripts(params: {repoName: string, environment: string, scripts: {database: string, fileName: string}[]}, callback: (error: any, data: {fileName: string, index: number, total: string}) => void) {
+        this.scriptsToRunAndDatabase = params.scripts;
+        this.currentScriptId = -1;
+        return new Promise((resolve, reject) => {
+            this.postgresUtils.executeFunction('mgtf_get_database_settings',[params.repoName, params.environment])
+                .then((settings: {key: string, value: string}[]) => {
+                    this.currentSettings = settings;
+                    this.runScriptOneByOne()
+                        .then(resolve)
+                        .catch(reject);
+                })
+                .catch(reject);
+        });
+    }
+
+    getInstallationTree(params : {repoName?: string, version?: string, user?: string, fileName?: string}) {
+        return new Promise((resolve, reject) => {
+            this.postgresUtils.executeFunction('mgtf_get_installation_tree',[params.repoName, params.version, params.user, params.fileName])
+                .then(resolve)
+                .catch(reject);
+        });
+    }
+
+    private runScriptOneByOne(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.currentScriptId++;
+            if (this.scriptsToRunAndDatabase[this.currentScriptId]) {
+                FileUtils.readFile(this.scriptsToRunAndDatabase[this.currentScriptId].fileName)
+                    .then((fileString: string) => {
+                        this.postgresUtils.setConnectionString('postgres://root:route@postgresdb:5432/' + this.scriptsToRunAndDatabase[this.currentScriptId].database)
+                        this.postgresUtils.execute(fileString)
+                            .then(() => {
+                                this.runScriptOneByOne()
+                                    .then(resolve)
+                                    .catch(reject);
+                            })
+                            .catch(reject);
+                    })
+                    .catch(reject);
+            } else {
+                resolve();
+            }
         });
     }
 }

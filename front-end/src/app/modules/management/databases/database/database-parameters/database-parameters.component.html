@@ -1,3 +1,26 @@
-<p>
-  database-parameters works!
-</p>
+<mat-accordion>
+  <mat-expansion-panel hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        Parameters
+      </mat-panel-title>
+      <mat-panel-description>
+        <!-- check to set here -->
+        <span *ngIf="notSetCount > 0">{{notSetCount}} to set up</span>
+        <span *ngIf="notSetCount === 0">All set up</span>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <table>
+      <tr *ngFor="let parameter of parameters">
+        <td>{{parameter.name}}</td>
+        <td style="padding-left: 20px">
+          <mat-form-field class="example-full-width">
+            <input matInput (keyup)="onKeyUp(parameter.name, $event.target.value)" [name]="parameter.name" [placeholder]="parameter.name" [value]="parameter.value">
+          </mat-form-field>
+          <mat-progress-bar mode="indeterminate" *ngIf="(database$|async)?.updatingSetting?.done === false && (database$|async)?.updatingSetting?.settingName === parameter.name && (database$|async)?.updatingSetting?.environment === environment"></mat-progress-bar>
+          <mat-icon style="color: #57f751" *ngIf="(database$|async)?.updatingSetting?.done && (database$|async)?.updatingSetting?.settingName === parameter.name && (database$|async)?.updatingSetting?.environment === environment">done</mat-icon>
+        </td>
+      </tr>
+    </table>
+  </mat-expansion-panel>
+</mat-accordion>

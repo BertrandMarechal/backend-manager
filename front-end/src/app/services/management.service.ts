@@ -12,7 +12,13 @@ export class ManagementService {
         private localhostService: LocalhostService,
         private store: Store<fromManagement.State>
     ) {
+        setTimeout(() => {
+            this.store.dispatch(new ManagementActions.GetEnvironmentsInitAction());
+        }, 200);
+    }
 
+    getEnvironments(): Promise<{environmentName: string}[]> {
+        return <Promise<{environmentName: string}[]>>this.localhostService.get('environments');
     }
 
     getSettings(): Promise<ManagementSetting[]> {

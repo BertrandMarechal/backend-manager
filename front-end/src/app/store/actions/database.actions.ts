@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { RepositoryFile } from '../../models/database.model';
+import { RepositoryFile, DatabaseInstallationProgress } from '../../models/database.model';
 
 export const DATABASE_REPOSITORIES_UPDATED = '[Management effect] Repositories updated';
 export class RepositoriesUpdatedEffectAction implements Action {
@@ -46,16 +46,16 @@ export const SERVICE_PREPARE_UPDATE_OBJECT_COMPLETE = '[Database Service] PREPAR
 export const SERVICE_PREPARE_UPDATE_OBJECT_FAILED = '[Database Service] PREPARE_UPDATE_OBJECT failed';
 
 export class PrepareUpdateObjectPageAction implements Action {
-readonly type  = PREPARE_UPDATE_OBJECT_PAGE_ACTION;
-constructor(public payload?: {repoName: string, fileName: string, mode: string}) {}
+  readonly type = PREPARE_UPDATE_OBJECT_PAGE_ACTION;
+  constructor(public payload?: { repoName: string, fileName: string, mode: string }) { }
 }
 export class ServicePrepareUpdateObjectCompleteAction implements Action {
-readonly type  = SERVICE_PREPARE_UPDATE_OBJECT_COMPLETE;
-constructor(public payload?: any) {}
+  readonly type = SERVICE_PREPARE_UPDATE_OBJECT_COMPLETE;
+  constructor(public payload?: any) { }
 }
 export class ServicePrepareUpdateObjectFailedAction implements Action {
-readonly type  = SERVICE_PREPARE_UPDATE_OBJECT_FAILED;
-constructor(public payload?: string) {}
+  readonly type = SERVICE_PREPARE_UPDATE_OBJECT_FAILED;
+  constructor(public payload?: string) { }
 }
 
 export const SET_VERSION_AS_INSTALLED_PAGE_ACTION = '[Database Page] SET_VERSION_AS_INSTALLED';
@@ -63,29 +63,73 @@ export const SERVICE_SET_VERSION_AS_INSTALLED_COMPLETE = '[Database Service] SET
 export const SERVICE_SET_VERSION_AS_INSTALLED_FAILED = '[Database Service] SET_VERSION_AS_INSTALLED failed';
 
 export class SetVersionAsInstalledPageAction implements Action {
-readonly type  = SET_VERSION_AS_INSTALLED_PAGE_ACTION;
-constructor(public payload?: {versionName: string}) {}
+  readonly type = SET_VERSION_AS_INSTALLED_PAGE_ACTION;
+  constructor(public payload?: { versionName: string }) { }
 }
 export class ServiceSetVersionAsInstalledCompleteAction implements Action {
-readonly type  = SERVICE_SET_VERSION_AS_INSTALLED_COMPLETE;
-constructor(public payload?: any) {}
+  readonly type = SERVICE_SET_VERSION_AS_INSTALLED_COMPLETE;
+  constructor(public payload?: any) { }
 }
 export class ServiceSetVersionAsInstalledFailedAction implements Action {
-readonly type  = SERVICE_SET_VERSION_AS_INSTALLED_FAILED;
-constructor(public payload?: string) {}
+  readonly type = SERVICE_SET_VERSION_AS_INSTALLED_FAILED;
+  constructor(public payload?: string) { }
 }
 
 export const SELECT_DATABASE_PAGE_ACTION =
   '[Databases Page] select database';
 export class SelecteDatabasePageAction implements Action {
   readonly type = SELECT_DATABASE_PAGE_ACTION;
-  constructor(public payload: any) {}
+  constructor(public payload: any) { }
 }
 export const FILTER_DATABASE_FILES_PAGE_ACTION =
   '[Database Page] filter database files';
 export class FilterDatabaseFilesPageAction implements Action {
   readonly type = FILTER_DATABASE_FILES_PAGE_ACTION;
-  constructor(public payload: string) {}
+  constructor(public payload: string) { }
+}
+
+export const SAVE_SETTING_PAGE = '[Database Page] SAVE_SETTING';
+export const SERVICE_SAVE_SETTING_COMPLETE = '[Database Service] SAVE_SETTING complete';
+export const SERVICE_SAVE_SETTING_FAILED = '[Database Service] SAVE_SETTING failed';
+export const SERVICE_SAVE_SETTING_UPDATING_WIPE = '[Database Service] SAVE_SETTING_UPDATING wipe';
+
+export class SaveSettingPageAction implements Action {
+  readonly type = SAVE_SETTING_PAGE;
+  constructor(public payload?: { settingName: string, settingValue: string, environment: string }) { }
+}
+export class ServiceSaveSettingCompleteAction implements Action {
+  readonly type = SERVICE_SAVE_SETTING_COMPLETE;
+  constructor(public payload?: any) { }
+}
+export class ServiceSaveSettingFailedAction implements Action {
+  readonly type = SERVICE_SAVE_SETTING_FAILED;
+  constructor(public payload?: string) { }
+}
+export class ServiceSaveSettingUpdatingWipeAction implements Action {
+  readonly type = SERVICE_SAVE_SETTING_UPDATING_WIPE;
+  constructor(public payload?: { settingName: string, settingValue: string, environment: string }) { }
+}
+
+export const INSTALL_DATABASES_PAGE_ACTION = '[Database Install Page] INSTALL_DATABASES';
+export const SERVICE_INSTALL_DATABASES_PROGRESS = '[Database Install Service] INSTALL_DATABASES progress';
+export const SERVICE_INSTALL_DATABASES_COMPLETE = '[Database Install Service] INSTALL_DATABASES complete';
+export const SERVICE_INSTALL_DATABASES_FAILED = '[Database Install Service] INSTALL_DATABASES failed';
+
+export class InstallDatabasePageAction implements Action {
+  readonly type = INSTALL_DATABASES_PAGE_ACTION;
+  constructor(public payload?: { repoName: string, version?: string, user?: string, fileName?: string }) { }
+}
+export class ServiceInstallDatabaseProgressAction implements Action {
+  readonly type = SERVICE_INSTALL_DATABASES_COMPLETE;
+  constructor(public payload: DatabaseInstallationProgress[]) { }
+}
+export class ServiceInstallDatabaseCompleteAction implements Action {
+  readonly type = SERVICE_INSTALL_DATABASES_PROGRESS;
+  constructor(public payload: DatabaseInstallationProgress[]) { }
+}
+export class ServiceInstallDatabaseFailedAction implements Action {
+  readonly type = SERVICE_INSTALL_DATABASES_FAILED;
+  constructor(public payload?: string) { }
 }
 
 export const DATABASE_NOTHING_ACTION = '[Database] nothing';
@@ -110,4 +154,12 @@ export type DatabaseActions =
   | ServiceSetVersionAsInstalledFailedAction
   | SelecteDatabasePageAction
   | FilterDatabaseFilesPageAction
+  | SaveSettingPageAction
+  | ServiceSaveSettingCompleteAction
+  | ServiceSaveSettingFailedAction
+  | ServiceSaveSettingUpdatingWipeAction
+  | InstallDatabasePageAction
+  | ServiceInstallDatabaseProgressAction
+  | ServiceInstallDatabaseCompleteAction
+  | ServiceInstallDatabaseFailedAction
   | DatabaseNothingAction;

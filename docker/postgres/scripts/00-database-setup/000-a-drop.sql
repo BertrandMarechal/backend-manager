@@ -31,6 +31,6 @@ DROP TABLE IF EXISTS mgtt_database_version_file_dvf;
 DROP TABLE IF EXISTS mgtt_database_version_dependencies_dvd;
 DROP TABLE IF EXISTS mgtt_database_version_dbv;
 DROP TABLE IF EXISTS mgtt_database_file_dbf;
-DROP TABLE IF EXISTS mgtt_environment_env;
 DROP TABLE IF EXISTS mgtt_setting_set;
+DROP TABLE IF EXISTS mgtt_environment_env;
 DROP TABLE IF EXISTS mgtt_repository_rep;

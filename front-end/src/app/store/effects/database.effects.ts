@@ -5,6 +5,7 @@ import { fromPromise } from 'rxjs/internal-compatibility';
 import { Observable } from 'rxjs';
 import { Store, Action } from '@ngrx/store';
 import * as fromDatabase from '../reducers/database.reducers';
+import * as froManagement from '../reducers/management.reducers';
 import * as DatabaseActions from '../actions/database.actions';
 import { DatabaseService } from '../../services/database.service';
 import { Router } from '@angular/router';
@@ -205,11 +206,16 @@ export class DatabaseEffects {
   installDatabases: Observable<Action> = this.actions$
     .ofType(DatabaseActions.INSTALL_DATABASES_PAGE_ACTION)
     .pipe(
-      switchMap((action: DatabaseActions.InstallDatabasePageAction) => {
+      withLatestFrom(this.storeManagement.select('management')),
+      switchMap(([action, stateManagement]: any) => {
         return fromPromise(
-          this.databaseService.installDatabase(action.payload),
+          this.databaseService.installDatabase({
+            ...action.payload,
+            environment: stateManagement.enviironment
+          }),
         ).pipe(
           mergeMap(() => {
+            this.router.navigate(['/management', 'databases', 'install', 'log-progress']);
             return [
               {
                 type: DatabaseActions.DATABASE_NOTHING_ACTION
@@ -255,6 +261,7 @@ export class DatabaseEffects {
     private actions$: Actions,
     private databaseService: DatabaseService,
     private store: Store<fromDatabase.FeatureState>,
+    private storeManagement: Store<froManagement.FeatureState>,
     private router: Router) {
 
   }

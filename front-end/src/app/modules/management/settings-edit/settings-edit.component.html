@@ -3,7 +3,7 @@
     <mat-card-subtitle>Those are the settings on which the server is basing its process.</mat-card-subtitle>
     <mat-card-content>
         <form (ngSubmit)="onSubmit()" #settingsForm="ngForm">
-            <div *ngFor="let setting of (this.management$|async)?.settings">
+            <div *ngFor="let setting of (this.management$|async)?.settings|filterOnEnvironment:(this.management$|async)?.environment">
                 <mat-form-field>
                     <input
                         matInput

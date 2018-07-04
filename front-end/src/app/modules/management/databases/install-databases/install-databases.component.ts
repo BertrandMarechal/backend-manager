@@ -26,11 +26,12 @@ export class InstallDatabasesComponent implements OnInit {
     this.management$ = this.storeManagement.select('management');
   }
 
-  onInstall(type: InstallationObjectType, item: any) {
-    if (type === 'Application') {
-      this.store.dispatch(new DatabaseActions.InstallDatabasePageAction({
-        repoName: item.name
-      }));
-    }
+  onInstall(params: {
+    repoName?: string,
+    version?: string,
+    user?: string,
+    fileName?: string
+  }) {
+    this.store.dispatch(new DatabaseActions.InstallDatabasePageAction(params));
   }
 }

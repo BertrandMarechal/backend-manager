@@ -35,6 +35,8 @@ import { DatabaseTableEditComponent } from './modules/management/databases/datab
 import { DatabaseFunctionEditComponent } from './modules/management/databases/database/database-function-edit/database-function-edit.component';
 import { DatabaseObjectListComponent } from './modules/management/databases/database/database-object-list/database-object-list.component';
 import { DatabaseVersionInstalledComponent } from './modules/management/databases/database/database-version-installed/database-version-installed.component';
+import { LogProgressComponent } from './modules/management/databases/install-databases/log-progress/log-progress.component';
+import { FilterOnEnvironmentPipe } from './modules/management/settings/filter-on-environment.pipe';
 
 @NgModule({
   declarations: [
@@ -55,6 +57,8 @@ import { DatabaseVersionInstalledComponent } from './modules/management/database
     DatabaseFunctionEditComponent,
     DatabaseObjectListComponent,
     DatabaseVersionInstalledComponent,
+    LogProgressComponent,
+    FilterOnEnvironmentPipe,
   ],
   imports: [
     BrowserModule,

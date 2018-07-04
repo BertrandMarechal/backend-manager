@@ -21,7 +21,7 @@ export interface State {
   selectedDatabaseInformation: DatabaseInformation;
   updatingSetting: { settingName: string, settingValue: string, environment: string, done: boolean };
 
-  installingDatabase: boolean;
+  installingDatabases: boolean;
   installationProgress: number;
   installationProgressArray: DatabaseInstallationProgress[];
 }
@@ -38,9 +38,9 @@ export const initialState: State = {
   tableFileList: [],
   selectedDatabaseInformation: new DatabaseInformation(),
   updatingSetting: null,
-  installingDatabase: false,
+  installingDatabases: false,
   installationProgress: 0,
-  installationProgressArray: [],
+  installationProgressArray: null,
 };
 
 export function databaseReducers(state = initialState, action: DatabaseActions.DatabaseActions) {
@@ -130,7 +130,7 @@ export function databaseReducers(state = initialState, action: DatabaseActions.D
     case DatabaseActions.INSTALL_DATABASES_PAGE_ACTION:
       return {
         ...state,
-        installingDatabase: true,
+        installingDatabases: true,
         installationProgress: 0,
         installationProgressArray: []
       };
@@ -145,7 +145,7 @@ export function databaseReducers(state = initialState, action: DatabaseActions.D
       }, { total: 0, done: 0, progress: 0 }).progress;
       return {
         ...state,
-        installingDatabase: true,
+        installingDatabases: true,
         installationProgressArray: sidpProgressArray,
         installationProgress: totalSidbProgress
       };
@@ -154,14 +154,14 @@ export function databaseReducers(state = initialState, action: DatabaseActions.D
         .map(x => new DatabaseInstallationProgress(x));
       return {
         ...state,
-        installingDatabase: false,
+        installingDatabases: false,
         installationProgressArray: sidcProgressArray,
         installationProgress: 100
       };
     case DatabaseActions.SERVICE_INSTALL_DATABASES_FAILED:
       return {
         ...state,
-        installingDatabase: false
+        installingDatabases: false
       };
     default:
       return state;

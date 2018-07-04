@@ -91,7 +91,7 @@ export class DatabaseService {
         return <Promise<any>>this.localhostService.post('database/setting/update', data);
     }
 
-    installDatabase(params: { repoName: string, version?: string, user?: string, fileName?: string }): Promise<any> {
+    installDatabase(params: { repoName?: string, version?: string, user?: string, fileName?: string, environment: string}): Promise<any> {
         return new Promise((resolve) => {
             this.localhostService.hookCallback('install database progress', (data) => {
                 this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseProgressAction(data));

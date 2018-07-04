@@ -92,7 +92,7 @@ export interface DatabaseFile {
 export interface DatabaseFileStep {
     id: number;
     version: string;
-    databaseUserToUse: string;
+    databaseToUse: string;
     databaseFiles: DatabaseFileStepFile[];
 }
 

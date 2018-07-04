@@ -9,7 +9,7 @@ BEGIN
             (
                 'id', pk_dbv_id,
                 'version', dbv_version_id,
-                'databaseUserToUse', dbv_database_user_to_use,
+                'databaseToUse', dbv_database_to_use,
                 'databaseFiles', COALESCE(mgtf_get_database_version_files_data(pk_dbv_id), '[]'::JSON)
             )
         )

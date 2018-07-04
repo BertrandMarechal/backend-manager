@@ -27,7 +27,7 @@
             <mat-expansion-panel-header>
               <mat-panel-title>
                 <b>{{dbVersion.version}}</b> -
-                <span>{{dbVersion.databaseUserToUse}}</span>
+                <span>{{dbVersion.databaseToUse}}</span>
               </mat-panel-title>
               <mat-panel-description>
                 {{dbVersion.databaseFiles.length}} database scripts
@@ -47,29 +47,33 @@
                   </mat-panel-description>
                 </mat-expansion-panel-header>
                 <mat-action-row>
-                  <button mat-button color="primary" (click)="onInstall('File', dbFile)">Run script</button>
+                  <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version, database: dbVersion.databaseToUse, fileName: dbFile.filePath})">Run script</button>
                 </mat-action-row>
 
               </mat-expansion-panel>
             </mat-accordion>
 
             <mat-action-row>
-              <button mat-button color="primary" (click)="onInstall('Version step', dbVersion)">Install version step</button>
+              <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version, database: dbVersion.databaseToUse})">Install version step</button>
             </mat-action-row>
 
           </mat-expansion-panel>
         </mat-accordion>
 
         <mat-action-row>
-          <button mat-button color="primary" (click)="onInstall('Version', db)">Install version</button>
+          <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version})">Install version</button>
         </mat-action-row>
 
       </mat-expansion-panel>
     </mat-accordion>
 
     <mat-action-row>
-      <button mat-button color="primary" (click)="onInstall('Application', database)">Install application</button>
+      <button mat-button color="primary" (click)="onInstall({repoName: database.name})">Install application</button>
     </mat-action-row>
 
   </mat-expansion-panel>
 </mat-accordion>
+<mat-action-row>
+  <button mat-button color="primary" *ngIf="(database$|async)?.installationProgressArray" routerLink="log-progress">See installation {{(database$|async)?.installingDatabases ? 'progress': 'logs'}}</button>
+  <button mat-button color="primary" *ngIf="(management$|async)?.environment === 'local'" (click)="onInstall('Application', null)">Install all</button>
+</mat-action-row>

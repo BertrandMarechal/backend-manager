@@ -1,0 +1,28 @@
+<mat-toolbar color="accent" class="mat-elevation-z8">
+  <mat-toolbar-row>
+    <mat-icon style="cursor: pointer; padding: 10px;" routerLink="..">arrow_back</mat-icon>
+    <span>Installation {{(database$|async)?.installingDatabases ? 'progress': 'logs'}}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<mat-accordion>
+  <mat-expansion-panel *ngFor="let step of (database$|async)?.installationProgressArray" hideToggle [expanded]="step.installing">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <b>{{step.repoName}}</b>
+      </mat-panel-title>
+      <mat-panel-description>
+        {{step.version}} {{step.user}}
+      </mat-panel-description>
+      <mat-progress-bar style="margin-right: 10px;" *ngIf="step.progress > 0" style="float: right; width: 300px;" mode="determinate" [value]="step.progress"></mat-progress-bar>
+    </mat-expansion-panel-header>
+    <mat-list>
+      <mat-list-item *ngFor="let file of step.files">
+        <span>
+          {{file.fileName}}
+        </span>
+        <mat-icon *ngIf="file.done" style="color: green;">done</mat-icon>
+      </mat-list-item>
+    </mat-list>
+  </mat-expansion-panel>
+</mat-accordion>

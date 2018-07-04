@@ -279,26 +279,42 @@ export class ManagementServer {
 
         });
 
-        this.client.on('install database', (params: {settingName: string, settingValue: string, repoName: string, environment: string}) => {
+        this.client.on('install database', (params: { repoName?: string, version?: string, user?: string, fileName?: string, environment: string}) => {
             console.log('install database');
-            this.databaseManagement.getInstallationTree(params)
-                .then((data: any) => {
-                    // console.log(data);
-                    
-                    // this.repositoryReader.getRepoDatabaseFiles(params.repoName)
-                    //     .then((data) => {
-                            this.client.emit('install database complete', data);
-                        //     this.repositoryReader.geRepositoryData()
-                        //         .then((data: any) => {
-                        //             this.client.emit('install database complete', data);
-                        //         })
-                        //         .catch((error) => {
-                        //             this.client.emit('install database failed', error);
-                        //         })
-                        // })
-                        // .catch((error) => {
-                        //     this.client.emit('install database failed', error);
-                        // })
+            console.log(params);
+            this.databaseManagement.getEnvironmentSettings(params)
+                .then((settings: {repoName: string, key: string, value: string}[]) => {
+                    if (settings.filter(x => !!x.value).length > 0) {
+                        this.client.emit('install database failed', 'Some settings are not set up for this environment');
+                    } else {
+                        this.databaseManagement.getInstallationTree(params)
+                            .then((data: any) => {
+                                if (data.length > 0) {
+                                    data[0].installing = true;
+                                }
+                                this.client.emit('install database progress', data);
+
+                                // console.log(data);data
+                                
+                                // this.repositoryReader.getRepoDatabaseFiles(params.repoName)
+                                //     .then((data) => {
+                                        this.client.emit('install database complete', data);
+                                    //     this.repositoryReader.geRepositoryData()
+                                    //         .then((data: any) => {
+                                    //             this.client.emit('install database complete', data);
+                                    //         })
+                                    //         .catch((error) => {
+                                    //             this.client.emit('install database failed', error);
+                                    //         })
+                                    // })
+                                    // .catch((error) => {
+                                    //     this.client.emit('install database failed', error);
+                                    // })
+                            })
+                            .catch((error) => {
+                                this.client.emit('install database failed', error);
+                            });
+                    }
                 })
                 .catch((error) => {
                     this.client.emit('install database failed', error);

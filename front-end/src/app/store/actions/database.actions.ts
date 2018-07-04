@@ -117,7 +117,7 @@ export const SERVICE_INSTALL_DATABASES_FAILED = '[Database Install Service] INST
 
 export class InstallDatabasePageAction implements Action {
   readonly type = INSTALL_DATABASES_PAGE_ACTION;
-  constructor(public payload?: { repoName: string, version?: string, user?: string, fileName?: string }) { }
+  constructor(public payload?: { repoName?: string, version?: string, user?: string, fileName?: string }) { }
 }
 export class ServiceInstallDatabaseProgressAction implements Action {
   readonly type = SERVICE_INSTALL_DATABASES_COMPLETE;

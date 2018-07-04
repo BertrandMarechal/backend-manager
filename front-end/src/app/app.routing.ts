@@ -8,6 +8,7 @@ import { RepositoriesComponent } from './modules/management/repositories/reposit
 import { DatabasesComponent } from './modules/management/databases/databases.component';
 import { DatabaseComponent } from './modules/management/databases/database/database.component';
 import { InstallDatabasesComponent } from './modules/management/databases/install-databases/install-databases.component';
+import { LogProgressComponent } from './modules/management/databases/install-databases/log-progress/log-progress.component';
 
 const routes: Routes = [
   {
@@ -29,6 +30,10 @@ const routes: Routes = [
           {
             path: 'install',
             component: InstallDatabasesComponent
+          },
+          {
+            path: 'install/log-progress',
+            component: LogProgressComponent
           },
           {
             path: ':code',

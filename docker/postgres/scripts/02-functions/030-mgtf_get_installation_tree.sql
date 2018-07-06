@@ -31,7 +31,8 @@ BEGIN
                 dvf_position INTEGER,
                 db_position INTEGER,
                 dependency_position INTEGER)
-        ON COMMIT DROP;
+        -- ON COMMIT DROP;
+        ;
         WITH
                 raw_data
                 AS

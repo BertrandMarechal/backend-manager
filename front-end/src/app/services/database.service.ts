@@ -97,6 +97,7 @@ export class DatabaseService {
                 this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseProgressAction(data));
             });
             this.localhostService.hookCallback('install database failed', (data) => {
+                console.log(data);
                 this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseFailedAction(data));
             });
             this.localhostService.hookCallback('install database complete', (data) => {

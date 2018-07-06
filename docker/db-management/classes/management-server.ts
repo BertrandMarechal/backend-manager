@@ -1,13 +1,12 @@
 import express from 'express';
 import * as http from 'http';
 import * as bodyParser from 'body-parser';
-import * as path from 'path';
 import IO from "socket.io";
-import { PostgresUtils } from '../utils/postgres.utils';
 import { FileUtils } from '../utils/file.utils';
 import { DatabaseManagement } from './database-management';
 import { RepositoryReader } from './repository-reader';
 import { Setting } from '../models/settings.model';
+import { DatabaseInstallationProgress } from '../models/database-installation-progress.model';
 
 
 export class ManagementServer {
@@ -15,23 +14,12 @@ export class ManagementServer {
     private server: any;
     private io: any;
     private client: any;
-    private httpServer: any;
-    private postgresUtils: PostgresUtils;
     private databaseManagement: DatabaseManagement;
-    private repositories?: { name: string, isDatabase: boolean, isMiddleTier: boolean }[];
-    private databases?: any;
     private repositoryReader: RepositoryReader;
 
     constructor() {
-        console.log(process.argv[2]);
-        this.postgresUtils = new PostgresUtils();
         this.databaseManagement = new DatabaseManagement();
         this.repositoryReader = new RepositoryReader(this.databaseManagement);
-        if (process.argv[2]) {
-            this.postgresUtils.setConnectionString('postgres://root:route@localhost:5432/postgres');
-        } else {
-            this.postgresUtils.setConnectionString('postgres://root:route@postgresdb:5432/postgres');
-        }
     }
 
     static logServerEvents(message: string) {
@@ -54,15 +42,15 @@ export class ManagementServer {
         this.declareRoutes();
         if (process.argv[2]) {
             this.runDatabaseInitializationSctipt()
-            .then(() => {
-                this.server.listen(process.argv[2] ? 690 : 8080, (error: any) => {
-                    console.log('listening');
+                .then(() => {
+                    this.server.listen(process.argv[2] ? 690 : 8080, (error: any) => {
+                        console.log('listening');
+                    });
+                })
+                .catch((error) => {
+                    console.log(error);
+
                 });
-            })
-            .catch((error) => {
-                console.log(error);
-                
-            });
         } else {
             this.server.listen(process.argv[2] ? 690 : 8080, (error: any) => {
                 console.log('listening');
@@ -96,8 +84,7 @@ export class ManagementServer {
                 FileUtils.readFile(fileList[0])
                     .then((command: any) => {
                         console.log('Running ' + fileList[0]);
-
-                        this.postgresUtils.execute(command)
+                        this.databaseManagement.run(command)
                             .then(() => {
                                 fileList.splice(0, 1);
                                 return this.runFiles(fileList).then(resolve).catch(reject);
@@ -124,8 +111,7 @@ export class ManagementServer {
     private declareRoutes() {
         this.app.get('/settings', (req: any, res: any) => {
             console.log('/settings');
-            this.databaseManagement
-                .execute('mgtf_get_settings')
+            this.databaseManagement.getSettings()
                 .then((settings: Setting[]) => {
                     res.send({ error: null, data: settings });
                 }).catch((error) => {
@@ -147,7 +133,7 @@ export class ManagementServer {
         });
         this.app.post('/database/setting/update', (req: any, res: any) => {
             console.log('/database/setting/update');
-            const body: {settingName: string, settingValue: string, repoName: string, environment: string} = req.body;
+            const body: { settingName: string, settingValue: string, repoName: string, environment: string } = req.body;
             this.databaseManagement
                 .execute('mgtf_set_database_environment_setting', [body.repoName, body.environment, body.settingName, body.settingValue])
                 .then(() => {
@@ -156,26 +142,6 @@ export class ManagementServer {
                     console.log(error);
                     res.send({ error: error });
                 });
-        });
-        this.app.get('/databases', (req: any, res: any) => {
-            console.log('/databases');
-            if (this.repositories) {
-                Promise.all(this.repositories
-                    .filter(x => x.isDatabase)
-                    .map(x => FileUtils.getFileList({
-                        filter: /version\.json/,
-                        startPath: '../repos/' + x.name,
-                        foldersToIgnore: ['typescript']
-                    })))
-                    .then((data) => {
-                        this.databases = data;
-                        res.send({ data: data });
-                    }).catch((error) => {
-                        res.send({ error: error });
-                    });
-            } else {
-                res.send({ error: 'No repos yet. Please go to http://localhost:690/repositories' });
-            }
         });
         this.app.get('/databases/:repo/init/:dbalias', (req: any, res: any) => {
             console.log('/databases/' + req.params.repo + '/init');
@@ -186,7 +152,7 @@ export class ManagementServer {
 
         this.app.get('/environments', (req: any, res: any) => {
             console.log('/environments');
-            this.postgresUtils.executeFunction('mgtf_get_environments')
+            this.databaseManagement.execute('mgtf_get_environments')
                 .then(x => ManagementServer.sendDataBack(x, res))
                 .catch(x => ManagementServer.sendErrorBack(x, res));
         });
@@ -254,7 +220,7 @@ export class ManagementServer {
                     this.client.emit('run discovery failed', error);
                 });
         });
-        
+
         this.client.on('initialize database', (params: { repoName: string, dbAlias: string }) => {
             console.log('initialize database');
             this.databaseManagement.createDatabaseFolderStructure(params.repoName, params.dbAlias)
@@ -279,13 +245,14 @@ export class ManagementServer {
 
         });
 
-        this.client.on('install database', (params: { repoName?: string, version?: string, user?: string, fileName?: string, environment: string}) => {
+        this.client.on('install database', (params: { repoName?: string, version?: string, user?: string, fileName?: string, environment: string }) => {
             console.log('install database');
-            console.log(params);
-            this.databaseManagement.getEnvironmentSettings(params)
-                .then((settings: {repoName: string, key: string, value: string}[]) => {
-                    if (settings.filter(x => !!x.value).length > 0) {
-                        this.client.emit('install database failed', 'Some settings are not set up for this environment');
+            this.databaseManagement.getDatabaseEnvironmentSettings(params)
+                .then((settings: { repoName: string, key: string, value: string }[]) => {
+                    const settingsNotSet = settings.filter(x => !x.value);
+                    if (settingsNotSet.length > 0) {
+                        console.log('Some settings are not set up for this environment: ' + settingsNotSet.map(x => x.key).join(','));
+                        this.client.emit('install database failed', ('Some settings are not set up for this environment: ' + settingsNotSet.map(x => x.key).join(',')));
                     } else {
                         this.databaseManagement.getInstallationTree(params)
                             .then((data: any) => {
@@ -293,23 +260,22 @@ export class ManagementServer {
                                     data[0].installing = true;
                                 }
                                 this.client.emit('install database progress', data);
-
-                                // console.log(data);data
-                                
-                                // this.repositoryReader.getRepoDatabaseFiles(params.repoName)
-                                //     .then((data) => {
+                                this.databaseManagement.installDatabases(
+                                    data,
+                                    params,
+                                    settings,
+                                    (databaseProgress: DatabaseInstallationProgress[]) => {                                        
+                                        this.client.emit('install database progress', databaseProgress);
+                                    }
+                                )
+                                    .then((data: any) => {
+                                        console.log('installed');
                                         this.client.emit('install database complete', data);
-                                    //     this.repositoryReader.geRepositoryData()
-                                    //         .then((data: any) => {
-                                    //             this.client.emit('install database complete', data);
-                                    //         })
-                                    //         .catch((error) => {
-                                    //             this.client.emit('install database failed', error);
-                                    //         })
-                                    // })
-                                    // .catch((error) => {
-                                    //     this.client.emit('install database failed', error);
-                                    // })
+                                    })
+                                    .catch((error: any) => {
+                                        console.log(error);
+                                        this.client.emit('install database failed', error);
+                                    });
                             })
                             .catch((error) => {
                                 this.client.emit('install database failed', error);
@@ -343,7 +309,7 @@ export class ManagementServer {
                     this.client.emit('create database version failed', error);
                 });
         });
-        this.client.on('prepare update object', (params: {repoName: string, fileName: string, mode: string}) => {
+        this.client.on('prepare update object', (params: { repoName: string, fileName: string, mode: string }) => {
             console.log('prepare update object');
             this.databaseManagement.prepareUpdateDatabaseObject(params)
                 .then((x: any) => {
@@ -365,7 +331,7 @@ export class ManagementServer {
                     this.client.emit('prepare update object failed', error);
                 });
         });
-        this.client.on('set version as installed', (params: {repoName: string, versionName: string}) => {
+        this.client.on('set version as installed', (params: { repoName: string, versionName: string }) => {
             console.log('set version as installed');
             this.databaseManagement.setVersionAsInstalled(params)
                 .then((x: any) => {

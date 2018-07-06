@@ -235,16 +235,6 @@ export class ManagementEffects {
     )
     .pipe(
       switchMap((action: ManagementActions.ServiceRunRepoDiscoveryCompleteAction) => {
-        const toast = (swal as any).mixin({
-          toast: true,
-          position: 'bottom-end',
-          showConfirmButton: false,
-          timer: 3000
-        });
-        toast({
-          type: 'success',
-          title: 'Complete'
-        });
         return [
           {
             type: DatabaseActions.DATABASE_REPOSITORIES_UPDATED,

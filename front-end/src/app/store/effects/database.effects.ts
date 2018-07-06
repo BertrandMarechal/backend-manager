@@ -10,6 +10,7 @@ import * as DatabaseActions from '../actions/database.actions';
 import { DatabaseService } from '../../services/database.service';
 import { Router } from '@angular/router';
 import swal from 'sweetalert2';
+import { DatabaseInstallationProgress } from '../../models/database.model';
 
 @Injectable()
 export class DatabaseEffects {
@@ -134,7 +135,7 @@ export class DatabaseEffects {
   saveSetting: Observable<Action> = this.actions$
     .ofType(DatabaseActions.SAVE_SETTING_PAGE)
     .pipe(
-      debounceTime(500),
+      // debounceTime(1000),
       withLatestFrom(this.store.select('databaseManagement')),
       switchMap(([action, state]: any[]) => {
         return fromPromise(
@@ -154,6 +155,7 @@ export class DatabaseEffects {
               type: 'success',
               title: 'Setting saved'
             });
+            console.log(data);
             return [
               {
                 type: DatabaseActions.SERVICE_SAVE_SETTING_COMPLETE,
@@ -211,7 +213,7 @@ export class DatabaseEffects {
         return fromPromise(
           this.databaseService.installDatabase({
             ...action.payload,
-            environment: stateManagement.enviironment
+            environment: stateManagement.environment
           }),
         ).pipe(
           mergeMap(() => {
@@ -239,7 +241,7 @@ export class DatabaseEffects {
       DatabaseActions.SERVICE_INSTALL_DATABASES_COMPLETE,
     )
     .pipe(
-      switchMap((action: DatabaseActions.ServiceInstallDatabaseCompleteAction) => {
+      switchMap(() => {
         const toast = (swal as any).mixin({
           toast: true,
           position: 'bottom-end',
@@ -250,6 +252,48 @@ export class DatabaseEffects {
           type: 'success',
           title: 'Database installed'
         });
+        return [
+          {
+            type: DatabaseActions.DATABASE_NOTHING_ACTION
+          },
+        ];
+      }),
+  );
+  @Effect()
+  installDatabasesFailed: Observable<Action> = this.actions$
+    .ofType(
+      DatabaseActions.SERVICE_INSTALL_DATABASES_FAILED,
+    )
+    .pipe(
+      withLatestFrom(this.store.select('databaseManagement')),
+      switchMap(([action, state]: any[]) => {
+        console.log(typeof action.payload);
+        if (typeof action.payload !== 'string') {
+          const firstScriptFailing = state.installationProgressArray.reduce((current: string, x: DatabaseInstallationProgress) => {
+            const wasInstalling = x.installing;
+            if (wasInstalling) {
+              current = x.files.reduce((currentY, y) => {
+                if (!y.done && currentY === '') {
+                  currentY = x.repoName + y.fileName;
+                }
+                return currentY;
+              }, '');
+            }
+            return current;
+          }, '');
+          swal({
+            type: 'error',
+            title: 'Script failed',
+            html: 'The following script failed: <br/>' + firstScriptFailing
+          });
+        } else {
+          console.log(action);
+          swal({
+            type: 'error',
+            title: 'Script failed',
+            text: action.payload
+          });
+        }
         return [
           {
             type: DatabaseActions.DATABASE_NOTHING_ACTION

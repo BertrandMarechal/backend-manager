@@ -2,8 +2,10 @@ import { PostgresUtils } from "../utils/postgres.utils";
 import { FileUtils } from "../utils/file.utils";
 import { DatabaseInstallationProgress } from "../models/database-installation-progress.model";
 import { promises } from "fs";
+import { Setting } from "../models/settings.model";
 
 const originFolder = process.argv[2] ? '../../../' : '../repos/';
+const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
 
 interface FolderStructureItem {
     folderName?: string,
@@ -27,33 +29,46 @@ export class DatabaseManagement {
     currentDatabaseStepId: number;
     currentScriptId: number;
     currentSettings: DatabaseSettingForInstallation;
+    currentInstallationRootPassword: string;
+    currentInstallationDatabase: string;
+    currentGlobalSettings: Setting[];
+    managementDatabaseConnectionString: string;
     databaseInstallationProgress: DatabaseInstallationProgress[];
     databaseInstallationProgressCallback: (databases: DatabaseInstallationProgress[]) => void;
 
     constructor() {
+        this.managementDatabaseConnectionString = `postgres://root:route@${postgresDatabaseToUse}:5432/postgres`;
         this.filesData = {};
         this.scriptsToRunAndDatabase = [];
         this.databaseInstallationProgress = [];
         this.currentSettings = {};
+        this.currentGlobalSettings = [];
+        this.currentInstallationRootPassword = '';
+        this.currentInstallationDatabase = '';
         this.currentScriptId = -1;
         this.currentDatabaseStepId = -1;
-        this.databaseInstallationProgressCallback = (databases) => {
-            console.log(databases);
-        };
+        this.databaseInstallationProgressCallback = () => {};
         this.postgresUtils = new PostgresUtils();
-        this.postgresUtils.setConnectionString(process.argv[2] ? 'postgres://root:route@localhost:5432/postgres' : 'postgres://root:route@postgresdb:5432/postgres')
+        this.setConnectionString(this.managementDatabaseConnectionString);
+    }
+
+    setConnectionString(connectionString: string) {
+        this.postgresUtils.setConnectionString(connectionString);
+        return this;
     }
 
     execute(functionName: string, data?: any[]): Promise<any> {
         return this.postgresUtils.executeFunction(functionName, data)
     }
 
+    run(command: string): Promise<any> {
+        return this.postgresUtils.execute(command);
+    }
+
     createDatabaseFolderStructure(repoName: string, dbAlias: string): Promise<any> {
         return new Promise((resolve, reject) => {
             FileUtils.readJsonFile(__dirname + '/../data/database-structure/folder-structure.json')
                 .then((folderStructure: FolderStructureItem[]) => {
-                    console.log(folderStructure);
-
                     for (let i = 0; i < folderStructure.length; i++) {
                         const element = folderStructure[i];
                         this.processFolderStructureItem(element, dbAlias, originFolder + repoName + '/');
@@ -109,7 +124,6 @@ export class DatabaseManagement {
                     source = FileUtils.readFileSync(__dirname + '/../data/database-structure/files/version.json');
                     this.filesData['version.json'] = source;
                 }
-                console.log(originFolder + repoName + '/postgres/release/current/version.json');
                 FileUtils.writeFileSync(originFolder + repoName + '/postgres/release/current/version.json', source);
                 resolve();
             }
@@ -119,25 +133,18 @@ export class DatabaseManagement {
     prepareUpdateDatabaseObject(params: { repoName: string, fileName: string, mode: string }): Promise<any> {
         return new Promise((resolve, reject) => {
             // get source file
-            console.log('get source file');
-            console.log(originFolder + params.repoName + '/postgres/' + params.fileName);
             FileUtils.readFile(originFolder + params.repoName + '/postgres/' + params.fileName)
                 .then((source: string) => {
-                    console.log(source);
-
                     const fileNameSplit = params.fileName.split('/');
                     const fileFileName = fileNameSplit[fileNameSplit.length - 1];
                     const objectName = fileFileName.split('.')[0];
                     const fileNamesToAddToVersionJson: string[] = [];
 
                     if (params.fileName.indexOf('/03-tables/') > -1) {
-                        console.log('table');
                         if (params.mode === 'drop') {
                             fileNamesToAddToVersionJson.push(params.fileName.replace('/postgres/schema/', '/postgres/current/'));
-                            console.log('drop');
                             source = 'DROP TABLE IF EXISTS ' + objectName + ';';
                         } else if (params.mode === 'update') {
-                            console.log('update');
                             // create alter table script
                             const alter = 'ALTER TABLE IF EXISTS ' + objectName + ' add column DUMMY INTEGER;';
                             FileUtils.writeFileSync(originFolder + params.repoName + '/postgres/release/current/scripts/alter_' + objectName + '.sql', alter);
@@ -146,22 +153,16 @@ export class DatabaseManagement {
                     } else if (params.fileName.indexOf('/07-functions/') > -1) {
                         // if we talk about a function we arerunning the script anyway
                         fileNamesToAddToVersionJson.push(params.fileName.replace('/postgres/schema/', '/postgres/current/'));
-                        console.log('function');
                         if (params.mode === 'drop') {
-                            console.log('drop');
                             source = 'DROP FUNCTION IF EXISTS ' + objectName + DatabaseManagement.getFunctionParameters(source) + ';';
                         } else if (params.mode === 'update') {
-                            console.log('update');
                             source = 'DROP FUNCTION IF EXISTS ' + objectName + DatabaseManagement.getFunctionParameters(source) + ';\r\n'
                                 + source;
                         }
                     }
                     // copy to current
-                    console.log('copy to current');
                     FileUtils.writeFileSync(originFolder + params.repoName + '/postgres/' + params.fileName.replace('/postgres/schema/', 'postgres/current/'), source);
                     // update version.json
-                    console.log('update version.json');
-
                     FileUtils.readJsonFile(originFolder + params.repoName + '/postgres/release/current/version.json')
                         .then((data) => {
                             data[data.length - 1].fileList = [
@@ -208,20 +209,17 @@ export class DatabaseManagement {
     setVersionAsInstalled(params: { repoName: string, versionName: string }): Promise<any> {
         return new Promise((resolve, reject) => {
             // rename release/current as release/versionName
-            console.log('rename release/current as release/versionName');
             FileUtils.renameFolder(
                 originFolder + params.repoName + '/postgres/release/current',
                 originFolder + params.repoName + '/postgres/release/' + params.versionName)
                 .then(() => {
                     // get the files from current
-                    console.log('get the files from current');
                     FileUtils.getFileList({
                         startPath: originFolder + params.repoName + '/postgres/current',
                         filter: /.sql/
                     })
                         .then((fileList: string[]) => {
                             // put them in a schema_changes folder under the current version
-                            console.log('put them in a schema_changes folder under the current version');
                             for (let i = 0; i < fileList.length; i++) {
                                 const fileName = fileList[i];
                                 FileUtils.copyFileSync(
@@ -230,7 +228,6 @@ export class DatabaseManagement {
                                 );
                             }
                             // ovewrite the schema ones
-                            console.log('ovewrite the schema ones');
                             for (let i = 0; i < fileList.length; i++) {
                                 const fileName = fileList[i];
                                 FileUtils.copyFileSync(
@@ -239,7 +236,6 @@ export class DatabaseManagement {
                                 );
                             }
                             // update version.json
-                            console.log('update version.json');
                             FileUtils.readJsonFile(originFolder + params.repoName + '/postgres/release/' + params.versionName + '/version.json')
                                 .then((data) => {
                                     const updatedData = data.map((x: any) => {
@@ -250,7 +246,6 @@ export class DatabaseManagement {
                                     });
                                     FileUtils.writeFileSync(originFolder + params.repoName + '/postgres/release/' + params.versionName + '/version.json', JSON.stringify(updatedData));
                                     // delete the files
-                                    console.log('delete the files');
                                     for (let i = 0; i < fileList.length; i++) {
                                         const fileName = fileList[i];
                                         FileUtils.deleteFileSync(
@@ -269,9 +264,11 @@ export class DatabaseManagement {
         });
     }
 
-    getEnvironmentSettings(params: { repoName?: string, environment: string }): Promise<{ repoName: string, key: string, value: string }[]> {
+    getDatabaseEnvironmentSettings(params: { repoName?: string, environment: string }): Promise<{ repoName: string, key: string, value: string }[]> {
         return new Promise((resolve, reject) => {
-            this.postgresUtils.executeFunction('mgtf_get_database_settings', [params.repoName, params.environment])
+        this.postgresUtils
+            .setConnectionString(this.managementDatabaseConnectionString)
+            .executeFunction('mgtf_get_database_settings', [params.repoName, params.environment])
                 .then(resolve)
                 .catch(reject);
         });
@@ -279,24 +276,54 @@ export class DatabaseManagement {
 
     getInstallationTree(params: { repoName?: string, version?: string, user?: string, fileName?: string }) {
         return new Promise((resolve, reject) => {
-            this.postgresUtils.executeFunction('mgtf_get_installation_tree', [params.repoName, params.version, params.user, params.fileName])
+            this.postgresUtils
+            .setConnectionString(this.managementDatabaseConnectionString)
+            .executeFunction('mgtf_get_installation_tree', [params.repoName, params.version, params.user, params.fileName])
                 .then(resolve)
                 .catch(reject);
         });
     }
+    
+    getSettings(): Promise<Setting[]> {
+        return new Promise((resolve, reject) => {
+            this
+                .setConnectionString(this.managementDatabaseConnectionString)
+                .execute('mgtf_get_settings')
+                .then(resolve).catch(resolve);
+        })
+    }
 
     installDatabases(
         databases: DatabaseInstallationProgress[],
+        params: { repoName?: string, version?: string, user?: string, fileName?: string, environment: string},
         settings: { repoName: string, key: string, value: string }[],
         callback: (databases: DatabaseInstallationProgress[]) => void): Promise<any> {
         return new Promise((resolve, reject) => {
             this.processSettings(settings);
-            this.currentScriptId = -1;
-            this.currentDatabaseStepId = -1;
-            this.databaseInstallationProgress = databases;
-            this.databaseInstallationProgressCallback = callback;
-            this.installDatabaseStepsOneByOne()
-                .then(resolve)
+            this.getSettings()
+                .then((globalSettings: Setting[]) => {
+                    this.currentGlobalSettings = globalSettings;
+                    const currentEnvRootPasswordSetting = this.currentGlobalSettings
+                        .find(x => x.environment === params.environment &&
+                            x.name === 'root password'
+                        );
+                    if (!currentEnvRootPasswordSetting || !currentEnvRootPasswordSetting.value) {
+                        console.error('Missing root password for ' + params.environment);
+                        reject('Missing root password');
+                    } else {
+                        this.currentInstallationRootPassword = currentEnvRootPasswordSetting.value;
+                        this.currentScriptId = -1;
+                        this.currentDatabaseStepId = -1;
+                        this.databaseInstallationProgress = databases;
+                        this.databaseInstallationProgressCallback = callback;
+                        
+                        this.installDatabaseStepsOneByOne()
+                            .then(() => {
+                                resolve(this.databaseInstallationProgress);
+                            })
+                            .catch(reject);
+                    }
+                })
                 .catch(reject);
         })
     }
@@ -318,8 +345,18 @@ export class DatabaseManagement {
         this.currentDatabaseStepId++;
         return new Promise((resolve, reject) => {
             if (this.databaseInstallationProgress[this.currentDatabaseStepId]) {
+                this.databaseInstallationProgress[this.currentDatabaseStepId].installing = true;
+                this.databaseInstallationProgressCallback(this.databaseInstallationProgress);
+                if (this.databaseInstallationProgress[this.currentDatabaseStepId].database === 'postgres') {
+                    this.currentInstallationDatabase = 'postgres';
+                } else {
+                    this.currentInstallationDatabase = this.currentSettings[this.databaseInstallationProgress[this.currentDatabaseStepId].repoName].app_db_name;
+                }
+
                 this.installDatabaseStep()
                     .then(() => {
+                        this.databaseInstallationProgress[this.currentDatabaseStepId].installing = false;
+                        this.databaseInstallationProgressCallback(this.databaseInstallationProgress);
                         this.installDatabaseStepsOneByOne()
                             .then(resolve)
                             .catch(reject);
@@ -342,6 +379,9 @@ export class DatabaseManagement {
             if (this.databaseInstallationProgress[this.currentDatabaseStepId].files[this.currentScriptId]) {
                 this.runScript()
                     .then(() => {
+                        this.databaseInstallationProgress[this.currentDatabaseStepId].files[this.currentScriptId].done = true;
+                        this.databaseInstallationProgressCallback(this.databaseInstallationProgress);
+
                         this.runScriptsOneByOne()
                             .then(resolve)
                             .catch(reject);
@@ -354,7 +394,6 @@ export class DatabaseManagement {
     }
 
     private runScript(): Promise<any> {
-        this.currentScriptId = -1;
         return new Promise((resolve, reject) => {
             FileUtils.readFile(originFolder +
                 this.databaseInstallationProgress[this.currentDatabaseStepId].repoName + '/release/' +
@@ -365,7 +404,13 @@ export class DatabaseManagement {
                         command = command.replace(toReplace.oldValue,toReplace.newValue);
                         toReplace = this.getReplacementToDo(command, this.databaseInstallationProgress[this.currentDatabaseStepId].repoName);
                     }
-                    return this.postgresUtils.execute(command);
+                    this.postgresUtils.setConnectionString(
+                        `postgres://root:${this.currentInstallationRootPassword}@${postgresDatabaseToUse}:5432/${this.currentInstallationDatabase}`
+                    );
+                    
+                    return this.postgresUtils.execute(command)
+                        .then(resolve)
+                        .then(reject);
                 })
                 .catch(reject)
             
@@ -373,7 +418,7 @@ export class DatabaseManagement {
     }
 
     private getReplacementToDo(command: string, repoName: string): {oldValue: string, newValue: string} | null  {
-        let replacementToDo : {oldValue: string, newValue: string} | null = null;
+        let replacementToDo : {oldValue: string, newValue: string} | null = null;       
         let settingsToReplace = Object.keys(this.currentSettings[repoName]);
         for (let i = 0; i < settingsToReplace.length && !replacementToDo; i++) {
             const element = settingsToReplace[i];

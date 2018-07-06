@@ -22,6 +22,7 @@ export class PostgresUtils {
             }
             this.db = this.connections[this.connectionString];
         }
+        return this;
     }
 
     execute (sql: string, data?: any): Promise<any> {
@@ -46,6 +47,7 @@ export class PostgresUtils {
                     })
                     .catch((error: any) => {
                         console.log(sql);
+                        console.log(this.connectionString);
                         console.log(error);
                         reject(error);
                         this.endConnection();

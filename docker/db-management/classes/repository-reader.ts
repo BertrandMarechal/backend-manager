@@ -9,6 +9,7 @@ import { resolve } from "path";
 import { ServerlessFile } from "../models/serverless-file.model";
 
 const originFolder = process.argv[2] ? '../../../' : '../repos/';
+const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
 
 export class RepositoryReader {
     private databaseManagement: DatabaseManagement;
@@ -17,6 +18,7 @@ export class RepositoryReader {
     private variablesForRepo: string[];
     private variableRegex = new RegExp(/\<(\w+)\>/gi);
     private concurentFilesRead = 5;
+    private connectionString = `postgres://root:route@${postgresDatabaseToUse}:5432/postgres`;
 
     constructor(databaseManagement: DatabaseManagement) {
         this.databaseManagement = databaseManagement;
@@ -46,6 +48,7 @@ export class RepositoryReader {
     getRepositoryList(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.databaseManagement
+                .setConnectionString(this.connectionString)
                 .execute('mgtf_get_repositories')
                 .then((repositories: Repository[]) => {
                     if (!repositories || repositories.length === 0) {
@@ -56,6 +59,7 @@ export class RepositoryReader {
                             .map(RepositoryReader.processFileName);
                             
                             this.databaseManagement
+                                .setConnectionString(this.connectionString)
                                 .execute('mgtf_update_repo_folders', [fileList])
                                 .then((newRepositories: any) => {
                                     resolve(newRepositories);
@@ -71,12 +75,14 @@ export class RepositoryReader {
     getDatabasesVersionFiles(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.databaseManagement
+                .setConnectionString(this.connectionString)
                 .execute('mgtf_get_repositories')
                 .then((repositories: Repository[]) => {
                     // get the repositories that are SQL
                     const sqlFolders = repositories.filter(x => x.isDatabase);
                     if (sqlFolders.length === 0) {
                         this.databaseManagement
+                            .setConnectionString(this.connectionString)
                             .execute('mgtf_update_database_version_files')
                             .then((data: any) => {
                                 resolve(data);
@@ -117,6 +123,7 @@ export class RepositoryReader {
                                 return current.concat(x);
                             }, []);
                             this.databaseManagement
+                                .setConnectionString(this.connectionString)
                                 .execute('mgtf_update_database_version_files', [repoName, JSON.stringify(filesDataToSave)])
                                 .then(resolve)
                                 .catch(reject);
@@ -154,6 +161,7 @@ export class RepositoryReader {
     getDatabaseParametersFromFiles(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.databaseManagement
+                .setConnectionString(this.connectionString)
                 .execute('mgtf_get_repositories')
                 .then((repositories: Repository[]) => {
                     // get the repositories that are SQL
@@ -185,6 +193,7 @@ export class RepositoryReader {
     private getRepoDatabaseParametersFromFiles(repoName: string): Promise<any> {
         return new Promise((resolve, reject) => {
             this.databaseManagement
+                .setConnectionString(this.connectionString)
                 .execute('mgtf_get_database_version_files', [repoName])
                 .then((versionsFiles: { path: string }[]) => {
                     const regex = new RegExp(/\<(\w+)\>/gi);
@@ -192,6 +201,7 @@ export class RepositoryReader {
                     this.readDatabaseFilesForVariables(versionsFiles.map(x => x.path))
                         .then(() => {
                             this.databaseManagement
+                                .setConnectionString(this.connectionString)
                                 .execute('mgtf_save_database_repo_variables', [repoName, JSON.stringify(this.variablesForRepo)])
                                 .then(resolve)
                                 .catch(reject);
@@ -235,12 +245,14 @@ export class RepositoryReader {
     geMiddleTierRepositoriesServerlessFiles(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.databaseManagement
+                .setConnectionString(this.connectionString)
                 .execute('mgtf_get_repositories')
                 .then((repositories: Repository[]) => {
                     // get the repositories that are SQL
                     const middleTierFolders = repositories.filter(x => x.isMiddleTier);
                     if (middleTierFolders.length === 0) {
                         this.databaseManagement
+                            .setConnectionString(this.connectionString)
                             .execute('mgtf_update_middle_tier_files')
                             .then((data: any) => {
                                 resolve(data);
@@ -359,6 +371,7 @@ export class RepositoryReader {
                     }
                     
                     this.databaseManagement
+                        .setConnectionString(this.connectionString)
                         .execute('mgtf_update_middle_tier_files', [repoName, filesData.parentFolder, JSON.stringify(serverlessFile), JSON.stringify(variables)])
                         .then(resolve).catch(reject);
                 })
@@ -369,6 +382,7 @@ export class RepositoryReader {
     geRepositoryData(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.databaseManagement
+                .setConnectionString(this.connectionString)
                 .execute('mgtf_get_repositories_data')
                 .then(resolve).catch(reject);
         });

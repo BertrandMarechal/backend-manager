@@ -4,6 +4,7 @@ export interface IDatabaseInstallationProgress {
     repoName: string;
     version: string;
     user: string;
+    database: string;
     installing: boolean;
     files: {
         fileName: string;
@@ -16,6 +17,7 @@ export class DatabaseInstallationProgress {
     repoName: string;
     version: string;
     user: string;
+    database: string;
     installing: boolean;
     files: {
         fileName: string;
@@ -26,6 +28,7 @@ export class DatabaseInstallationProgress {
         this.repoName = '';
         this.version = '';
         this.user = '';
+        this.database = '';
         this.installing = false;
         this.files = [];
 

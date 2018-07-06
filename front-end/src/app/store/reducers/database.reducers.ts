@@ -114,13 +114,33 @@ export function databaseReducers(state = initialState, action: DatabaseActions.D
         }
       };
     case DatabaseActions.SERVICE_SAVE_SETTING_COMPLETE:
-      return {
+      const newState = {
         ...state,
         updatingSetting: {
           ...state.updatingSetting,
           done: true
+        },
+        selectedDatabase: {
+          ...state.selectedDatabase,
+          parameters: {
+            ...state.selectedDatabase.parameters,
+            [action.payload.data.environment]: [
+              ...state.selectedDatabase.parameters[action.payload.data.environment]
+                .map(x => {
+                  if (x.name === action.payload.data.settingName) {
+                    return {
+                      ...x,
+                      value: action.payload.data.settingValue
+                    };
+                  } else {
+                    return x;
+                  }
+                })
+            ]
+          }
         }
       };
+      return newState;
     case DatabaseActions.SERVICE_SAVE_SETTING_FAILED:
     case DatabaseActions.SERVICE_SAVE_SETTING_UPDATING_WIPE:
       return {
@@ -135,19 +155,26 @@ export function databaseReducers(state = initialState, action: DatabaseActions.D
         installationProgressArray: []
       };
     case DatabaseActions.SERVICE_INSTALL_DATABASES_PROGRESS:
-      const sidpProgressArray: DatabaseInstallationProgress[] = action.payload
-        .map(x => new DatabaseInstallationProgress(x));
-      const totalSidbProgress = sidpProgressArray.reduce((current, x) => {
-        current.total += 100;
-        current.done += x.progress || 0;
-        current.progress = (current.done > 0 ? Math.floor(100 * current.done / current.total) : 0);
-        return current;
-      }, { total: 0, done: 0, progress: 0 }).progress;
+      let sidpProgressArray: DatabaseInstallationProgress[] = [];
+      let totalSidbProgress = 0;
+      if (action.payload) {
+        sidpProgressArray = action.payload
+          .map(x => new DatabaseInstallationProgress(x));
+        totalSidbProgress = sidpProgressArray.reduce((current, x) => {
+          current.total += 100;
+          current.done += x.progress || 0;
+          current.progress = (current.done > 0 ? Math.floor(100 * current.done / current.total) : 0);
+          return current;
+        }, { total: 0, done: 0, progress: 0 }).progress;
+        return {
+          ...state,
+          installingDatabases: true,
+          installationProgressArray: sidpProgressArray,
+          installationProgress: totalSidbProgress
+        };
+      }
       return {
-        ...state,
-        installingDatabases: true,
-        installationProgressArray: sidpProgressArray,
-        installationProgress: totalSidbProgress
+        ...state
       };
     case DatabaseActions.SERVICE_INSTALL_DATABASES_COMPLETE:
       const sidcProgressArray: DatabaseInstallationProgress[] = action.payload

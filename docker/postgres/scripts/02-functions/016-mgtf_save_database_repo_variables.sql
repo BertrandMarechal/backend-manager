@@ -22,6 +22,10 @@ BEGIN
     SELECT pk_rep_id, REPLACE(json_array_elements(i_data)::TEXT,'"','')
     FROM mgtt_repository_rep
     WHERE rep_folder_name = i_repo_name
+    UNION ALL
+    SELECT pk_rep_id, 'app_db_name'
+    FROM mgtt_repository_rep
+    WHERE rep_folder_name = i_repo_name
     ON CONFLICT (dpa_name, fk_rep_dpa_repository_id) DO NOTHING;
 
     RETURN 1;

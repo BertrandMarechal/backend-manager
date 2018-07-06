@@ -11,14 +11,25 @@
       </mat-panel-description>
     </mat-expansion-panel-header>
     <table>
-      <tr *ngFor="let parameter of parameters">
+      <tr *ngFor="let parameter of parameters; let i = index">
         <td>{{parameter.name}}</td>
         <td style="padding-left: 20px">
           <mat-form-field class="example-full-width">
-            <input matInput (keyup)="onKeyUp(parameter.name, $event.target.value)" [name]="parameter.name" [placeholder]="parameter.name" [value]="parameter.value">
+            <input matInput
+              (keyup)="onKeyUp($event, i)"
+              [name]="parameter.name"
+              [placeholder]="parameter.name"
+              [value]="parameter.value">
           </mat-form-field>
-          <mat-progress-bar mode="indeterminate" *ngIf="(database$|async)?.updatingSetting?.done === false && (database$|async)?.updatingSetting?.settingName === parameter.name && (database$|async)?.updatingSetting?.environment === environment"></mat-progress-bar>
-          <mat-icon style="color: #57f751" *ngIf="(database$|async)?.updatingSetting?.done && (database$|async)?.updatingSetting?.settingName === parameter.name && (database$|async)?.updatingSetting?.environment === environment">done</mat-icon>
+          <mat-progress-bar
+            mode="indeterminate"
+            *ngIf="(database$|async)?.updatingSetting?.done === false && (database$|async)?.updatingSetting?.settingName === parameter.name && (database$|async)?.updatingSetting?.environment === environment"></mat-progress-bar>
+          <mat-icon
+            style="color: #57f751"
+            *ngIf="(database$|async)?.updatingSetting?.done && (database$|async)?.updatingSetting?.settingName === parameter.name && (database$|async)?.updatingSetting?.environment === environment">done</mat-icon>
+          <span
+            style="color: #a1a1a1"
+            *ngIf="parametersValue[i] && parametersValue[i] !== parameter.value"><span *ngIf="parameter.value">Previously: "{{parameter.value}}". </span>Press Enter to update.</span>
         </td>
       </tr>
     </table>

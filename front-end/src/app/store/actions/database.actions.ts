@@ -120,11 +120,11 @@ export class InstallDatabasePageAction implements Action {
   constructor(public payload?: { repoName?: string, version?: string, user?: string, fileName?: string }) { }
 }
 export class ServiceInstallDatabaseProgressAction implements Action {
-  readonly type = SERVICE_INSTALL_DATABASES_COMPLETE;
+  readonly type = SERVICE_INSTALL_DATABASES_PROGRESS;
   constructor(public payload: DatabaseInstallationProgress[]) { }
 }
 export class ServiceInstallDatabaseCompleteAction implements Action {
-  readonly type = SERVICE_INSTALL_DATABASES_PROGRESS;
+  readonly type = SERVICE_INSTALL_DATABASES_COMPLETE;
   constructor(public payload: DatabaseInstallationProgress[]) { }
 }
 export class ServiceInstallDatabaseFailedAction implements Action {

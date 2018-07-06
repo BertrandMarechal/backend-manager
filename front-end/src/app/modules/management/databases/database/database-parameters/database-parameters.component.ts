@@ -14,6 +14,7 @@ import { Store } from '@ngrx/store';
 export class DatabaseParametersComponent implements OnInit, OnChanges {
   @Input() parameters: RepositoryParameter[];
   @Input() environment: string;
+  parametersValue: string[];
 
   private notSetCount: number;
   database$: Observable<fromDatabase.State>;
@@ -23,7 +24,11 @@ export class DatabaseParametersComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit() {
+    this.parametersValue = [];
     this.database$ = this.store.select('databaseManagement');
+    this.database$.subscribe(() => {
+      this.parametersValue = [];
+    });
     this.compileNotSetCount();
   }
   ngOnChanges(changes: SimpleChanges) {
@@ -38,13 +43,15 @@ export class DatabaseParametersComponent implements OnInit, OnChanges {
     }
   }
 
-  onKeyUp(settingName: string, settingValue: string) {
-    console.log(settingName, settingValue);
-    this.store.dispatch(new DatabaseActions.SaveSettingPageAction({
-      settingName: settingName,
-      settingValue: settingValue,
-      environment: this.environment
-    }))
+  onKeyUp(event: any, i: number) {
+    this.parametersValue[i] = event.target.value;
+    if (event.key && event.key === 'Enter') {
+      this.store.dispatch(new DatabaseActions.SaveSettingPageAction({
+        settingName: event.target.name,
+        settingValue: event.target.value,
+        environment: this.environment
+      }));
+    }
   }
 
 }

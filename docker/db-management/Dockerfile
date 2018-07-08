@@ -18,10 +18,10 @@ VOLUME /usr/src/app
 
 RUN npm install
 
+VOLUME /usr/src/repos
+
 CMD ["/bin/bash"]
 
 EXPOSE 8080
 
-ENTRYPOINT nodemon
-
-VOLUME /usr/src/repos
+ENTRYPOINT nodemon -L

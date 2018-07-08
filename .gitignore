@@ -4,3 +4,5 @@ docker/db-management/node_modules/
 docker/node/app/node_modules/
 
 docker/database-files-watcher-installer/node_modules/
+
+docker/mock-aws/node_modules/

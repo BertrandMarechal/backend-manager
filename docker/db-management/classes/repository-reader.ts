@@ -1,11 +1,10 @@
 import { DatabaseManagement } from "./database-management";
-import { rejects } from "assert";
 import { FileUtils } from "../utils/file.utils";
 import { Repository } from "../models/repository.model";
 import { Setting } from "../models/settings.model";
 import * as YAML from 'yamljs';
 import { DatabaseVersionFileData, DatabaseVersionInformation } from "../models/database-version-file-data.model";
-import { resolve } from "path";
+import * as path from "path";
 import { ServerlessFile } from "../models/serverless-file.model";
 
 const originFolder = process.argv[2] ? '../../../' : '../repos/';
@@ -29,7 +28,7 @@ export class RepositoryReader {
 
     private static processFileName(fileName: string) {
         let newFileName = fileName
-            .replace('//','/')
+            .replace('//', '/')
             .replace(originFolder, '');
         return newFileName;
     }
@@ -56,8 +55,8 @@ export class RepositoryReader {
                             startPath: originFolder
                         }).then((fileList: string[]) => {
                             fileList = fileList
-                            .map(RepositoryReader.processFileName);
-                            
+                                .map(RepositoryReader.processFileName);
+
                             this.databaseManagement
                                 .setConnectionString(this.connectionString)
                                 .execute('mgtf_update_repo_folders', [fileList])
@@ -100,7 +99,7 @@ export class RepositoryReader {
     private getReposDatabaseFiles(repoNames: string[]): Promise<any> {
         return new Promise((resolve, reject) => {
             if (repoNames.length > 0) {
-                this.getRepoDatabaseFiles(repoNames.splice(0,1)[0])
+                this.getRepoDatabaseFiles(repoNames.splice(0, 1)[0])
                     .then(() => {
                         this.getReposDatabaseFiles(repoNames)
                             .then(resolve)
@@ -196,7 +195,6 @@ export class RepositoryReader {
                 .setConnectionString(this.connectionString)
                 .execute('mgtf_get_database_version_files', [repoName])
                 .then((versionsFiles: { path: string }[]) => {
-                    const regex = new RegExp(/\<(\w+)\>/gi);
                     this.variablesForRepo = [];
                     this.readDatabaseFilesForVariables(versionsFiles.map(x => x.path))
                         .then(() => {
@@ -215,27 +213,27 @@ export class RepositoryReader {
 
     private readDatabaseFilesForVariables(fileList: string[]): Promise<any> {
         return new Promise((resolve, reject) => {
-            if (fileList.length) {                
-                FileUtils.readFile(originFolder + fileList[0])
-                .then((fileContents: string) => {
-                    const variables = fileContents.match(this.variableRegex);
-                    if (variables && variables.length > 0) {
-                        const repoName = fileList[0].split('/')[0];
-                        this.variablesForRepo = variables.reduce((current: any, x) => {
-                            const existingItem = current
-                                .find((y: string) => y === x)
-                            if (!existingItem) {
-                                this.variablesForRepo.push(x);
-                            }
-                            return current;
-                        }, this.variablesForRepo);
-                    }
-                    fileList.splice(0,1);
-                    this.readDatabaseFilesForVariables(fileList)
-                    .then(resolve)
+            if (fileList.length) {
+                const fileName = path.resolve(originFolder, fileList[0]);
+                FileUtils.readFile(fileName)
+                    .then((fileContents: string) => {
+                        const variables = fileContents.match(this.variableRegex);
+                        if (variables && variables.length > 0) {
+                            this.variablesForRepo = variables.reduce((current: any, x) => {
+                                const existingItem = current
+                                    .find((y: string) => y === x)
+                                if (!existingItem) {
+                                    this.variablesForRepo.push(x);
+                                }
+                                return current;
+                            }, this.variablesForRepo);
+                        }
+                        fileList.splice(0, 1);
+                        this.readDatabaseFilesForVariables(fileList)
+                            .then(resolve)
+                            .catch(reject);
+                    })
                     .catch(reject);
-                })
-                .catch(reject);
             } else {
                 resolve();
             }
@@ -314,9 +312,9 @@ export class RepositoryReader {
                             }
                         })
                     ];
-                    const groupedFiles = files.reduce((current: {parentFolder: string, hasVariables: boolean}[], x) => {
+                    const groupedFiles = files.reduce((current: { parentFolder: string, hasVariables: boolean }[], x) => {
                         if (x.type === 'serverless') {
-                            current.push({parentFolder: x.parentFolder, hasVariables: false});
+                            current.push({ parentFolder: x.parentFolder, hasVariables: false });
                         } else if (x.type === 'variables') {
                             const serverlessIndex = current.findIndex(y => y.parentFolder === x.parentFolder);
                             if (serverlessIndex > -1) {
@@ -359,9 +357,9 @@ export class RepositoryReader {
             Promise.all(promises)
                 .then((filesStrings: string[]) => {
                     const serverlessFile: ServerlessFile = new ServerlessFile(RepositoryReader.ymlToJson(filesStrings[0]));
-                    let variables: {key: string, value: string}[] = [];
+                    let variables: { key: string, value: string }[] = [];
                     if (filesData.hasVariables) {
-                        const variablesObject: {[name: string]: string} = RepositoryReader.ymlToJson(filesStrings[1]);
+                        const variablesObject: { [name: string]: string } = RepositoryReader.ymlToJson(filesStrings[1]);
                         variables = Object.keys(variablesObject).map(x => {
                             return {
                                 key: x,
@@ -369,7 +367,7 @@ export class RepositoryReader {
                             };
                         })
                     }
-                    
+
                     this.databaseManagement
                         .setConnectionString(this.connectionString)
                         .execute('mgtf_update_middle_tier_files', [repoName, filesData.parentFolder, JSON.stringify(serverlessFile), JSON.stringify(variables)])

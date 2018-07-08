@@ -15,5 +15,5 @@ services:
     ports:
       - 690:8080
     volumes:
-      # - ./docker/db-management:/usr/src/app
+      - ./docker/db-management:/usr/src/app
       - ..:/usr/src/repos

@@ -28,7 +28,7 @@ export class ManagementEffects {
 
   @Effect()
   navigateToSettings: Observable<Action> = RouterUtilsService.handleNavigation(
-    'settings',
+    'management/settings',
     this.actions$,
     this.store.select('databaseManagement'),
     (r: ActivatedRouteSnapshot, state: State) => {

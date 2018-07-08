@@ -4,7 +4,7 @@ import * as fromDatabase from '../../store/reducers/database.reducers';
 import * as ManagementActions from '../../store/actions/management.actions';
 import * as DatabaseActions from '../../store/actions/database.actions';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-management',
@@ -17,6 +17,7 @@ export class ManagementComponent implements OnInit {
   databases$: Observable<fromDatabase.State>;
   databasesOpen: boolean;
   navbarOpen: boolean;
+  sub: Subscription;
 
   constructor(
     private store: Store<fromManagement.State>,
@@ -26,6 +27,14 @@ export class ManagementComponent implements OnInit {
   ngOnInit() {
     this.management$ = this.store.select('management');
     this.databases$ = this.storeDatabase.select('databaseManagement');
+    this.sub = this.management$.subscribe((state: fromManagement.State) => {
+      if (!this.navbarOpen && state.serverConnected) {
+        this.sub.unsubscribe();
+        setTimeout(() => {
+          this.navbarOpen = true;
+        }, 500);
+      }
+    });
   }
 
   onRunDiscovery() {

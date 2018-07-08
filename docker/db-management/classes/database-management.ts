@@ -263,7 +263,7 @@ export class DatabaseManagement {
 
         });
     }
-
+    
     getDatabaseEnvironmentSettings(params: { repoName?: string, environment: string }): Promise<{ repoName: string, key: string, value: string }[]> {
         return new Promise((resolve, reject) => {
         this.postgresUtils
@@ -396,7 +396,7 @@ export class DatabaseManagement {
     private runScript(): Promise<any> {
         return new Promise((resolve, reject) => {
             FileUtils.readFile(originFolder +
-                this.databaseInstallationProgress[this.currentDatabaseStepId].repoName + '/release/' +
+                this.databaseInstallationProgress[this.currentDatabaseStepId].repoName + '/postgres/' +
                 this.databaseInstallationProgress[this.currentDatabaseStepId].files[this.currentScriptId].fileName)
                 .then((command: string) => {
                     let toReplace: ReplacementToDo | null = this.getReplacementToDo(command, this.databaseInstallationProgress[this.currentDatabaseStepId].repoName);

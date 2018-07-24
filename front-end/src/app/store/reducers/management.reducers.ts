@@ -119,10 +119,10 @@ export function managementeReducers(state = initialState, action: ManagementActi
             };
         case ManagementActions.SERVICE_REPO_DISCOVERY_COMPLETE:
         case ManagementActions.SERVICE_GET_REPOSITORY_DATA_COMPLETE:
-            const hasDatabases = (action.payload || [])
-                .filter(x => x.isDatabase).length > 0;
-            const hasMiddleTiers = (action.payload || [])
-                .filter(x => x.isMiddleTier).length > 0;
+            const databases = (action.payload || []) .filter(x => x.isDatabase);
+            const middleTiers = (action.payload || []) .filter(x => x.isMiddleTier);
+            const hasDatabases = databases.length > 0;
+            const hasMiddleTiers = middleTiers.length > 0;
             return {
                 ...state,
                 currentDiscoveryStep: null,

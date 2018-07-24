@@ -9,6 +9,8 @@ import { DatabasesComponent } from './modules/management/databases/databases.com
 import { DatabaseComponent } from './modules/management/databases/database/database.component';
 import { InstallDatabasesComponent } from './modules/management/databases/install-databases/install-databases.component';
 import { LogProgressComponent } from './modules/management/databases/install-databases/log-progress/log-progress.component';
+import { ServerlessReposComponent } from './modules/management/serverless-repos/serverless-repos.component';
+import { ServerlessRepoComponent } from './modules/management/serverless-repos/serverless-repo/serverless-repo.component';
 
 const routes: Routes = [
   {
@@ -25,21 +27,11 @@ const routes: Routes = [
       },
       {
         path: 'databases',
-        component: DatabasesComponent,
-        children: [
-          {
-            path: 'install',
-            component: InstallDatabasesComponent
-          },
-          {
-            path: 'install/log-progress',
-            component: LogProgressComponent
-          },
-          {
-            path: ':code',
-            component: DatabaseComponent
-          },
-        ]
+        loadChildren: './modules/management/databases/databases.module#DatabasesModule'
+      },
+      {
+        path: 'serverless-repos',
+        loadChildren: './modules/management/serverless-repos/serverless-repos.module#ServerlessReposModule'
       },
       {
         path: 'settings',

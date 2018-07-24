@@ -16,7 +16,7 @@ export class DatabaseParametersComponent implements OnInit, OnChanges {
   @Input() environment: string;
   parametersValue: string[];
 
-  private notSetCount: number;
+  notSetCount: number;
   database$: Observable<fromDatabase.State>;
 
   constructor(

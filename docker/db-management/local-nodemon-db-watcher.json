@@ -1,0 +1,14 @@
+{
+    "watch": [
+        "./common/",
+        "./local-nodemon-db-watcher.json",
+        "./db-watcher/",
+        "../../../nearly-real-database/postgres/current",
+        "../../../nearly-real-database/postgres/release/current"
+    ],
+    "ignore": [
+        "src/**/*.spec.ts"
+    ],
+    "ext": "ts,sql,json",
+    "exec": "ts-node main-db-watcher.ts nearly-real-database local_nrd"
+}

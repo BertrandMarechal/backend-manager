@@ -8,5 +8,5 @@
         "src/**/*.spec.ts"
     ],
     "ext": "ts,sql,json",
-    "exec": "cls && ts-node main.ts nearly-real-database local_nrd"
+    "exec": "ts-node main-db-watcher.ts"
 }

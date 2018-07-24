@@ -2,9 +2,9 @@ import express from 'express';
 import * as http from 'http';
 import * as bodyParser from 'body-parser';
 import * as path from 'path';
-import {PostgresUtils} from '../utils/postgres.utils';
-import { FileUtils } from '../utils/file.utils';
-import { DatabaseManagement } from './database-management';
+import {PostgresUtils} from '../../utils/postgres.utils';
+import { FileUtils } from '../../utils/file.utils';
+import { DatabaseManagement } from '../../common/classes/database-management';
 
 
 export class DatabaseManagementServer {

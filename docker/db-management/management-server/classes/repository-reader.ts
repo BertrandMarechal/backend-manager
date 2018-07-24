@@ -1,9 +1,9 @@
-import { DatabaseManagement } from "./database-management";
-import { FileUtils } from "../utils/file.utils";
+import { DatabaseManagement } from "../../common/classes/database-management";
+import { FileUtils } from "../../utils/file.utils";
 import { Repository } from "../models/repository.model";
-import { Setting } from "../models/settings.model";
+import { Setting } from "../../common/models/settings.model";
 import * as YAML from 'yamljs';
-import { DatabaseVersionFileData, DatabaseVersionInformation } from "../models/database-version-file-data.model";
+import { DatabaseVersionFileData, DatabaseVersionInformation } from "../../common/models/database-version-file-data.model";
 import * as path from "path";
 import { ServerlessFile } from "../models/serverless-file.model";
 

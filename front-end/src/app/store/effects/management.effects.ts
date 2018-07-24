@@ -6,6 +6,7 @@ import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { State } from '../reducers/management.reducers';
 import * as ManagementActions from '../actions/management.actions';
 import * as DatabaseActions from '../actions/database.actions';
+import * as ServerlessActions from '../actions/serverless.actions';
 import * as fromManagement from '../reducers/management.reducers';
 import * as fromDatabase from '../reducers/database.reducers';
 import { ManagementService } from '../../services/management.service';
@@ -238,6 +239,10 @@ export class ManagementEffects {
         return [
           {
             type: DatabaseActions.DATABASE_REPOSITORIES_UPDATED,
+            payload: action.payload
+          },
+          {
+            type: ServerlessActions.SERVERLESS_REPOSITORIES_UPDATED,
             payload: action.payload
           },
         ];

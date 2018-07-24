@@ -39,6 +39,20 @@
           <a matLine>Repositories</a>
         </mat-list-item>
 
+        <mat-list-item *ngIf="(management$|async)?.hasMiddleTiers" (click)="middleTiersOpen = !middleTiersOpen">
+          <button mat-icon-button>
+            <mat-icon>functions</mat-icon>
+          </button>
+          <a matLine>Serverless</a>
+          <br>
+        </mat-list-item>
+
+        <mat-list-item *ngFor=" let serverlessRepo of (serverless$|async)?.serverlessRepos" (click)="onSelectServerlessRepo(serverlessRepo)"
+          routerLinkActive="active-link" style="background-color: #f1f1f1;">
+          <a matLine>{{serverlessRepo.name}}</a>
+          <br>
+        </mat-list-item>
+
         <mat-list-item *ngIf="(management$|async)?.hasDatabases" (click)="databasesOpen = !databasesOpen">
           <button mat-icon-button>
             <mat-icon>storage</mat-icon>
@@ -52,7 +66,6 @@
           <a matLine>Installation</a>
           <br>
         </mat-list-item>
-
 
         <mat-list-item *ngFor=" let database of (databases$|async)?.databases" (click)="onSelectDatabase(database)"
           routerLinkActive="active-link" style="background-color: #f1f1f1;">

@@ -1,0 +1,9 @@
+<mat-card style="height: 100%;" *ngIf="(serverless$|async)?.selectedServerlessRepo">
+  <input type="hidden" value="{{(serverless$|async)?.selectedServerlessRepo?.name}}" #serverlessName>
+  <mat-card-title>
+    {{(serverless$|async)?.selectedServerlessRepo?.name}}
+  </mat-card-title>
+  <mat-card-content>
+    <!-- <app-serverless-parameters [environment]="(management$|async)?.environment" [parameters]="(serverless$|async)?.selectedServerlessRepo?.parameters[(management$|async)?.environment]"></app-serverless-parameters> -->
+  </mat-card-content>
+</mat-card>

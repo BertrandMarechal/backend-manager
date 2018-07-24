@@ -1,13 +1,13 @@
 import express from 'express';
 import * as http from 'http';
 import * as bodyParser from 'body-parser';
+import {spawn} from 'child_process';
 import IO from "socket.io";
-import { FileUtils } from '../utils/file.utils';
-import { DatabaseManagement } from './database-management';
+import { FileUtils } from '../../utils/file.utils';
+import { DatabaseManagement } from '../../common/classes/database-management';
 import { RepositoryReader } from './repository-reader';
-import { Setting } from '../models/settings.model';
-import { DatabaseInstallationProgress } from '../models/database-installation-progress.model';
-
+import { Setting } from '../../common/models/settings.model';
+import { DatabaseInstallationProgress } from '../../common/models/database-installation-progress.model';
 
 export class ManagementServer {
     private app: any;
@@ -149,6 +149,12 @@ export class ManagementServer {
                 .then((x: any) => ManagementServer.sendDataBack(x, res))
                 .catch((x: any) => ManagementServer.sendErrorBack(x, res));
         });
+        this.app.get('/databases/:repo/watch', (req: any, res: any) => {
+            console.log('/databases/' + req.params.repo + '/watch');
+            // we want to launch the database watcher if not already set up
+            this.startWatchServer(req.params.repo, 'local_nrd');
+            res.send('OK');
+        });
 
         this.app.get('/environments', (req: any, res: any) => {
             console.log('/environments');
@@ -182,7 +188,6 @@ export class ManagementServer {
             this.attachSocket(client);
         });
     }
-
     private attachSocket(client: any) {
         this.client = client;
         this.client.on('run discovery', () => {
@@ -220,7 +225,6 @@ export class ManagementServer {
                     this.client.emit('run discovery failed', error);
                 });
         });
-
         this.client.on('initialize database', (params: { repoName: string, dbAlias: string }) => {
             console.log('initialize database');
             this.databaseManagement.createDatabaseFolderStructure(params.repoName, params.dbAlias)
@@ -244,47 +248,19 @@ export class ManagementServer {
                 });
 
         });
-
         this.client.on('install database', (params: { repoName?: string, version?: string, user?: string, fileName?: string, environment: string }) => {
             console.log('install database');
-            this.databaseManagement.getDatabaseEnvironmentSettings(params)
-                .then((settings: { repoName: string, key: string, value: string }[]) => {
-                    const settingsNotSet = settings.filter(x => !x.value);
-                    if (settingsNotSet.length > 0) {
-                        console.log('Some settings are not set up for this environment: ' + settingsNotSet.map(x => x.key).join(','));
-                        this.client.emit('install database failed', ('Some settings are not set up for this environment: ' + settingsNotSet.map(x => x.key).join(',')));
-                    } else {
-                        this.databaseManagement.getInstallationTree(params)
-                            .then((data: any) => {
-                                if (data.length > 0) {
-                                    data[0].installing = true;
-                                }
-                                this.client.emit('install database progress', data);
-                                this.databaseManagement.installDatabases(
-                                    data,
-                                    params,
-                                    settings,
-                                    (databaseProgress: DatabaseInstallationProgress[]) => {                                        
-                                        this.client.emit('install database progress', databaseProgress);
-                                    }
-                                )
-                                    .then((data: any) => {
-                                        console.log('installed');
-                                        this.client.emit('install database complete', data);
-                                    })
-                                    .catch((error: any) => {
-                                        console.log(error);
-                                        this.client.emit('install database failed', error);
-                                    });
-                            })
-                            .catch((error) => {
-                                this.client.emit('install database failed', error);
-                            });
-                    }
-                })
-                .catch((error) => {
-                    this.client.emit('install database failed', error);
-                });
+            this.databaseManagement.prepareInstallationAndInstall(params,(databaseProgress: DatabaseInstallationProgress[]) => {                                        
+                this.client.emit('install database progress', databaseProgress);
+            })
+            .then((data: any) => {
+                console.log('installed');
+                this.client.emit('install database complete', data);
+            })
+            .catch((error: any) => {
+                console.log(error);
+                this.client.emit('install database failed', error);
+            });
 
         });
         this.client.on('create database version', (repoName: string) => {
@@ -352,6 +328,26 @@ export class ManagementServer {
                 .catch((error) => {
                     this.client.emit('set version as installed failed', error);
                 });
+        });
+    }
+
+    private startWatchServer(repoName: string, dbAlias: string) {
+        // update nodemon-watcher.json
+        // start the child process
+        const watcherServer = spawn('nodemon.cmd', ['--config', 'local-nodemon-db-watcher', '-L'], {
+            stdio: ['pipe', 'pipe', 'pipe'],
+        });
+
+        watcherServer.stdout.on('data', (data) => {
+            console.log(`stdout: ${data}`);
+        });
+
+        // watcherServer.stderr.on('data', (data) => {
+        //     console.log(`stderr: ${data}`);
+        // });
+
+        watcherServer.on('close', (code) => {
+            console.log(`child process exited with code ${code}`);
         });
     }
 

@@ -1,8 +1,9 @@
-import { PostgresUtils } from "../utils/postgres.utils";
-import { FileUtils } from "../utils/file.utils";
+import { PostgresUtils } from "../../utils/postgres.utils";
+import { FileUtils } from "../../utils/file.utils";
 import { DatabaseInstallationProgress } from "../models/database-installation-progress.model";
 import { promises } from "fs";
 import { Setting } from "../models/settings.model";
+import { resolve } from "url";
 
 const originFolder = process.argv[2] ? '../../../' : '../repos/';
 const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
@@ -47,7 +48,7 @@ export class DatabaseManagement {
         this.currentInstallationDatabase = '';
         this.currentScriptId = -1;
         this.currentDatabaseStepId = -1;
-        this.databaseInstallationProgressCallback = () => {};
+        this.databaseInstallationProgressCallback = () => { };
         this.postgresUtils = new PostgresUtils();
         this.setConnectionString(this.managementDatabaseConnectionString);
     }
@@ -263,27 +264,63 @@ export class DatabaseManagement {
 
         });
     }
-    
-    getDatabaseEnvironmentSettings(params: { repoName?: string, environment: string }): Promise<{ repoName: string, key: string, value: string }[]> {
+
+    prepareInstallationAndInstall(
+        params: { repoName?: string, version?: string, user?: string, fileName?: string, environment: string},
+        callback: (databases: DatabaseInstallationProgress[]) => void
+    ): Promise<any> {
         return new Promise((resolve, reject) => {
-        this.postgresUtils
-            .setConnectionString(this.managementDatabaseConnectionString)
-            .executeFunction('mgtf_get_database_settings', [params.repoName, params.environment])
+            this.getDatabaseEnvironmentSettings(params)
+                .then((settings: { repoName: string, key: string, value: string }[]) => {
+                    const settingsNotSet = settings.filter(x => !x.value);
+                    if (settingsNotSet.length > 0) {
+                        console.log('Some settings are not set up for this environment: ' + settingsNotSet.map(x => x.key).join(','));
+                        reject('Some settings are not set up for this environment: ' + settingsNotSet.map(x => x.key).join(','));
+                    } else {
+                        this.getInstallationTree(params)
+                            .then((data: any) => {
+                                if (data.length > 0) {
+                                    data[0].installing = true;
+                                }
+                                callback(data);
+                                this.installDatabases(
+                                    data,
+                                    params,
+                                    settings,
+                                    callback
+                                )
+                                    .then((data: any) => {
+                                        console.log('installed');
+                                        resolve(data);
+                                    })
+                                    .catch(reject);
+                            })
+                            .catch(reject)
+                    }
+                })
+                .catch(reject)
+        });
+    }
+    private getDatabaseEnvironmentSettings(params: { repoName?: string, environment: string }): Promise<{ repoName: string, key: string, value: string }[]> {
+        return new Promise((resolve, reject) => {
+            this.postgresUtils
+                .setConnectionString(this.managementDatabaseConnectionString)
+                .executeFunction('mgtf_get_database_settings', [params.repoName, params.environment])
                 .then(resolve)
                 .catch(reject);
         });
     }
 
-    getInstallationTree(params: { repoName?: string, version?: string, user?: string, fileName?: string }) {
+    private getInstallationTree(params: { repoName?: string, version?: string, user?: string, fileName?: string }) {
         return new Promise((resolve, reject) => {
             this.postgresUtils
-            .setConnectionString(this.managementDatabaseConnectionString)
-            .executeFunction('mgtf_get_installation_tree', [params.repoName, params.version, params.user, params.fileName])
+                .setConnectionString(this.managementDatabaseConnectionString)
+                .executeFunction('mgtf_get_installation_tree', [params.repoName, params.version, params.user, params.fileName])
                 .then(resolve)
                 .catch(reject);
         });
     }
-    
+
     getSettings(): Promise<Setting[]> {
         return new Promise((resolve, reject) => {
             this
@@ -293,9 +330,9 @@ export class DatabaseManagement {
         })
     }
 
-    installDatabases(
+    private installDatabases(
         databases: DatabaseInstallationProgress[],
-        params: { repoName?: string, version?: string, user?: string, fileName?: string, environment: string},
+        params: { repoName?: string, version?: string, user?: string, fileName?: string, environment: string },
         settings: { repoName: string, key: string, value: string }[],
         callback: (databases: DatabaseInstallationProgress[]) => void): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -316,7 +353,7 @@ export class DatabaseManagement {
                         this.currentDatabaseStepId = -1;
                         this.databaseInstallationProgress = databases;
                         this.databaseInstallationProgressCallback = callback;
-                        
+
                         this.installDatabaseStepsOneByOne()
                             .then(() => {
                                 resolve(this.databaseInstallationProgress);
@@ -331,7 +368,7 @@ export class DatabaseManagement {
     private processSettings(settings: { repoName: string, key: string, value: string }[]) {
         this.currentSettings = settings.reduce((current: DatabaseSettingForInstallation, x) => {
             if (current[x.repoName]) {
-                current[x.repoName][x.key]= x.value;
+                current[x.repoName][x.key] = x.value;
             } else {
                 current[x.repoName] = {
                     [x.key]: x.value
@@ -341,7 +378,7 @@ export class DatabaseManagement {
         }, {});
     }
 
-    private installDatabaseStepsOneByOne():Promise<any> {
+    private installDatabaseStepsOneByOne(): Promise<any> {
         this.currentDatabaseStepId++;
         return new Promise((resolve, reject) => {
             if (this.databaseInstallationProgress[this.currentDatabaseStepId]) {
@@ -373,7 +410,7 @@ export class DatabaseManagement {
         return this.runScriptsOneByOne();
     }
 
-    private runScriptsOneByOne():Promise<any> {
+    private runScriptsOneByOne(): Promise<any> {
         this.currentScriptId++;
         return new Promise((resolve, reject) => {
             if (this.databaseInstallationProgress[this.currentDatabaseStepId].files[this.currentScriptId]) {
@@ -401,29 +438,29 @@ export class DatabaseManagement {
                 .then((command: string) => {
                     let toReplace: ReplacementToDo | null = this.getReplacementToDo(command, this.databaseInstallationProgress[this.currentDatabaseStepId].repoName);
                     while (toReplace) {
-                        command = command.replace(toReplace.oldValue,toReplace.newValue);
+                        command = command.replace(toReplace.oldValue, toReplace.newValue);
                         toReplace = this.getReplacementToDo(command, this.databaseInstallationProgress[this.currentDatabaseStepId].repoName);
                     }
                     this.postgresUtils.setConnectionString(
                         `postgres://root:${this.currentInstallationRootPassword}@${postgresDatabaseToUse}:5432/${this.currentInstallationDatabase}`
                     );
-                    
+
                     return this.postgresUtils.execute(command)
                         .then(resolve)
                         .then(reject);
                 })
                 .catch(reject)
-            
+
         });
     }
 
-    private getReplacementToDo(command: string, repoName: string): {oldValue: string, newValue: string} | null  {
-        let replacementToDo : {oldValue: string, newValue: string} | null = null;       
+    private getReplacementToDo(command: string, repoName: string): { oldValue: string, newValue: string } | null {
+        let replacementToDo: { oldValue: string, newValue: string } | null = null;
         let settingsToReplace = Object.keys(this.currentSettings[repoName]);
         for (let i = 0; i < settingsToReplace.length && !replacementToDo; i++) {
             const element = settingsToReplace[i];
             if (command.indexOf(element) > -1) {
-                replacementToDo = {oldValue: element, newValue: this.currentSettings[repoName][element]};
+                replacementToDo = { oldValue: element, newValue: this.currentSettings[repoName][element] };
             }
         }
         return replacementToDo

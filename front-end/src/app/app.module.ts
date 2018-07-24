@@ -18,25 +18,14 @@ import { MaterialModule } from './modules/material/material.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SettingsEditComponent } from './modules/management/settings-edit/settings-edit.component';
-import { SweetAlert2Module } from '@toverux/ngx-sweetalert2';
 import { HomeComponent } from './modules/management/home/home.component';
 import { RepositoriesComponent } from './modules/management/repositories/repositories.component';
-import { DatabasesComponent } from './modules/management/databases/databases.component';
-import { DatabaseComponent } from './modules/management/databases/database/database.component';
-import { DatabaseParametersComponent } from './modules/management/databases/database/database-parameters/database-parameters.component';
-import { DatabaseVersionComponent } from './modules/management/databases/database/database-version/database-version.component';
-import { DatabaseParametersEditComponent } from './modules/management/databases/database/database-parameters-edit/database-parameters-edit.component';
-import { DatabaseParametersNotSetPipe } from './modules/management/databases/database-parameters-not-set.pipe';
-import { InstallDatabasesComponent } from './modules/management/databases/install-databases/install-databases.component';
-import { databaseReducers } from './store/reducers/database.reducers';
+import { SharedModule } from './modules/shared/shared.module';
 import { DatabaseEffects } from './store/effects/database.effects';
+import { databaseReducers } from './store/reducers/database.reducers';
+import { ServerlessEffects } from './store/effects/serverless.effects';
+import { serverlessReducers } from './store/reducers/serverless.reducers';
 import { DatabaseService } from './services/database.service';
-import { DatabaseTableEditComponent } from './modules/management/databases/database/database-table-edit/database-table-edit.component';
-import { DatabaseFunctionEditComponent } from './modules/management/databases/database/database-function-edit/database-function-edit.component';
-import { DatabaseObjectListComponent } from './modules/management/databases/database/database-object-list/database-object-list.component';
-import { DatabaseVersionInstalledComponent } from './modules/management/databases/database/database-version-installed/database-version-installed.component';
-import { LogProgressComponent } from './modules/management/databases/install-databases/log-progress/log-progress.component';
-import { FilterOnEnvironmentPipe } from './modules/management/settings/filter-on-environment.pipe';
 
 @NgModule({
   declarations: [
@@ -46,38 +35,27 @@ import { FilterOnEnvironmentPipe } from './modules/management/settings/filter-on
     SettingsEditComponent,
     HomeComponent,
     RepositoriesComponent,
-    DatabasesComponent,
-    DatabaseComponent,
-    DatabaseParametersComponent,
-    DatabaseParametersEditComponent,
-    DatabaseVersionComponent,
-    DatabaseParametersNotSetPipe,
-    InstallDatabasesComponent,
-    DatabaseTableEditComponent,
-    DatabaseFunctionEditComponent,
-    DatabaseObjectListComponent,
-    DatabaseVersionInstalledComponent,
-    LogProgressComponent,
-    FilterOnEnvironmentPipe,
   ],
   imports: [
     BrowserModule,
-    SweetAlert2Module.forRoot(),
     FormsModule,
     HttpClientModule,
     BrowserAnimationsModule,
     StoreRouterConnectingModule,
     appRouting,
     StoreModule.forRoot(reducers),
+    EffectsModule.forRoot([]),
     StoreModule.forFeature('management', managementeReducers),
     StoreModule.forFeature('databaseManagement', databaseReducers),
-    EffectsModule.forRoot([]),
+    StoreModule.forFeature('serverless', serverlessReducers),
     EffectsModule.forFeature([
       ManagementEffects,
-      DatabaseEffects
+      DatabaseEffects,
+      ServerlessEffects
     ]),
     MaterialModule,
     ReactiveFormsModule,
+    SharedModule,
   ],
   providers: [LocalhostService, ManagementService, DatabaseService],
   bootstrap: [AppComponent]

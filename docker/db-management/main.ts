@@ -1,4 +1,4 @@
-import { ManagementServer } from "./classes/management-server";
+import { ManagementServer } from "./management-server/classes/management-server";
 
 
 const server = new ManagementServer();

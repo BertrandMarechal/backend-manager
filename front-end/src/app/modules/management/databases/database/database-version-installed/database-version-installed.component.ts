@@ -10,9 +10,9 @@ export class DatabaseVersionInstalledComponent implements OnInit, OnChanges {
   @Input() databases: DatabaseFile[];
   @Output() databaseSelected: EventEmitter<string> = new EventEmitter();
   @Output() cancel: EventEmitter<any> = new EventEmitter();
-  private selectedId: number = null;
-  private currentVersion: string;
-  private databaseVersions: { version: string, signification: string }[] = [];
+  selectedId: number = null;
+  currentVersion: string;
+  databaseVersions: { version: string, signification: string }[] = [];
 
   constructor() { }
 

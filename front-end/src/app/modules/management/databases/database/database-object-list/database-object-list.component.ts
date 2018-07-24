@@ -9,7 +9,7 @@ export class DatabaseObjectListComponent implements OnInit, OnChanges {
   @Input() objectList: string[];
   @Output() objectSelected: EventEmitter<string> = new EventEmitter();
   @Output() cancel: EventEmitter<any> = new EventEmitter();
-  private selectedId: number = null;
+   selectedId: number = null;
 
   constructor() { }
 

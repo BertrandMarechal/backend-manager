@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS mgtt_kms_key_kky;

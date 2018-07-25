@@ -11,6 +11,7 @@ BEGIN
                     (
                         'id', pk_mtp_id,
                         'name', mtp_parameter_name,
+                        'declared', mtp_declared,
                         'value', mpe_value
                     )
                 )

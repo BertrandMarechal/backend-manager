@@ -51,8 +51,8 @@ BEGIN
             ) b
             INNER JOIN function_data ON mlf_name = b."name"
         ), insert_params as (
-                INSERT INTO mgtt_middle_tier_parameter_mtp (fk_mtf_mtp_middle_tier_file_id, mtp_parameter_name)
-                SELECT pk_mtf_id, v_variables.variables_values->>'key'
+                INSERT INTO mgtt_middle_tier_parameter_mtp (fk_mtf_mtp_middle_tier_file_id, mtp_parameter_name, mtp_declared)
+                SELECT pk_mtf_id, v_variables.variables_values->>'key', (v_variables.variables_values->>'declared')::boolean
                 FROM insert_data_file
                 LEFT JOIN (
                         SELECT json_array_elements(i_variables_file) as variables_values

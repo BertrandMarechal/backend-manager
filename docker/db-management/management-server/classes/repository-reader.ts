@@ -357,13 +357,14 @@ export class RepositoryReader {
             Promise.all(promises)
                 .then((filesStrings: string[]) => {
                     const serverlessFile: ServerlessFile = new ServerlessFile(RepositoryReader.ymlToJson(filesStrings[0]));
-                    let variables: { key: string, value: string | null }[] = [];
+                    let variables: { key: string, value: string | null, declared: boolean }[] = [];
                     if (filesData.hasVariables) {
                         const variablesObject: { [name: string]: string } = RepositoryReader.ymlToJson(filesStrings[1]);
                         variables = Object.keys(variablesObject).map(x => {
                             return {
                                 key: x,
-                                value: variablesObject[x]
+                                value: variablesObject[x],
+                                declared: !!variablesObject[x]
                             };
                         })
                     }
@@ -382,7 +383,8 @@ export class RepositoryReader {
                         if (!item) {
                             agg.push({
                                 key: current,
-                                value: null
+                                value: null,
+                                declared: false
                             });
                         }
                         return agg;

@@ -72,7 +72,7 @@ export interface MiddleTierFileParameter {
     value: string;
     id: number;
 }
-export interface LambdaFunctionParameters {
+export interface LambdaFunctionParameter {
     id: number;
     name: string;
     declared: boolean;
@@ -98,7 +98,7 @@ export interface LambdaFunction {
     handler: string;
     handlerFunctionName: string;
     events?: any[];
-    parameters: LambdaFunctionParameters[]
+    parameters: LambdaFunctionParameter[]
 }
 export interface RepositoryParameter {
     name: string;

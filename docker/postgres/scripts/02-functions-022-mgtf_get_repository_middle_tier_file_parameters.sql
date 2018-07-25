@@ -18,7 +18,7 @@ BEGIN
                 FROM mgtt_middle_tier_parameter_mtp
                 LEFT JOIN mgtt_middle_tier_parameter_environment_mpe
                     ON fk_mtp_mpe_middle_tier_parameter_id = pk_mtp_id
-                    AND fk_env_mpe_environment_id = pk_env_id
+                AND fk_env_mpe_environment_id = pk_env_id
                 WHERE fk_mtf_mtp_middle_tier_file_id = i_file_id
             )
         )

@@ -1,9 +1,35 @@
 <mat-card style="height: 100%;" *ngIf="(serverless$|async)?.selectedServerlessRepo">
   <input type="hidden" value="{{(serverless$|async)?.selectedServerlessRepo?.name}}" #serverlessName>
   <mat-card-title>
-    {{(serverless$|async)?.selectedServerlessRepo?.name}}
+    {{(serverless$|async)?.selectedServerlessRepo.name}}
   </mat-card-title>
   <mat-card-content>
-    <!-- <app-serverless-parameters [environment]="(management$|async)?.environment" [parameters]="(serverless$|async)?.selectedServerlessRepo?.parameters[(management$|async)?.environment]"></app-serverless-parameters> -->
+      <div *ngIf="(serverless$|async)?.selectedServerlessRepo?.middleTiers">
+          <mat-accordion>
+              <mat-expansion-panel *ngFor="let middleTier of (serverless$|async)?.selectedServerlessRepo?.middleTiers" class="example-headers-align" hideToggle>
+                  <mat-expansion-panel-header>
+                      <mat-panel-title>
+                           {{middleTier.serviceName}}
+                      </mat-panel-title>
+                      <mat-panel-description>
+                          {{middleTier.fileName}}
+                      </mat-panel-description>
+                  </mat-expansion-panel-header>
+          
+                  <app-serverless-repo-parameters
+                    *ngFor="let parameter of middleTier.parameters[(management$|async)?.environment]"
+                    [environment]="(management$|async)?.environment"
+                    [parameter]="parameter"
+                    [serviceName]="middleTier.serviceName"
+                    [updated]="(serverless$|async)?.updatingSettings[middleTier.serviceName + '-' + parameter.name]"></app-serverless-repo-parameters>
+              </mat-expansion-panel>
+          </mat-accordion>
+      </div>
+
+
+
+
+
+
   </mat-card-content>
 </mat-card>

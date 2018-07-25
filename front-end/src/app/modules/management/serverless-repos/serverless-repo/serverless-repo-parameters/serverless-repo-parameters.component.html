@@ -1,3 +1,14 @@
-<p>
-  serverless-repo-parameters works!
-</p>
+<table>
+  <tr>
+    <td>{{parameter.name}}</td>
+    <td style="padding-left: 20px">
+      <mat-form-field class="example-full-width">
+        <input matInput (keyup)="onKeyUp($event)" [name]="parameter.name" [placeholder]="parameter.name" [value]="parameter.value">
+      </mat-form-field>
+      <mat-progress-bar mode="indeterminate" *ngIf="updated === false"></mat-progress-bar>
+      <mat-icon style="color: #57f751" *ngIf="updated === true">done</mat-icon>
+      <span style="color: #a1a1a1" *ngIf="parameterValue && parameterValue !== parameter.value && !updated">
+        <span *ngIf="parameter.value">Previously: "{{parameter.value}}". </span>Press Enter to update.</span>
+    </td>
+  </tr>
+</table>

@@ -2,7 +2,7 @@ import { LocalhostService } from './localhost.service';
 import { Injectable } from '@angular/core';
 
 @Injectable()
-export class DatabaseService {
+export class ServerlessService {
     constructor(
         private localhostService: LocalhostService,
     ) {

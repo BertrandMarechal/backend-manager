@@ -72,11 +72,33 @@ export interface MiddleTierFileParameter {
     value: string;
     id: number;
 }
+export interface LambdaFunctionParameters {
+    id: number;
+    name: string;
+    declared: boolean;
+    value: string;
+}
+
+export interface LambdaFunctionEventParametersRule {
+    type: string; // TODO: create a type with 'prefix', 'suffix'
+    value: string;
+}
+export interface LambdaFunctionEventParameters {
+    bucket: string;
+    event: string;
+    rules: LambdaFunctionEventParametersRule[];
+}
+export interface LambdaFunctionEvent {
+    id: number;
+    type: string;
+    parameters: LambdaFunctionEventParameters;
+}
 export interface LambdaFunction {
     name: string;
     handler: string;
     handlerFunctionName: string;
-    events: any[];
+    events?: any[];
+    parameters: LambdaFunctionParameters[]
 }
 export interface RepositoryParameter {
     name: string;

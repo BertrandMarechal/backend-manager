@@ -357,7 +357,7 @@ export class RepositoryReader {
             Promise.all(promises)
                 .then((filesStrings: string[]) => {
                     const serverlessFile: ServerlessFile = new ServerlessFile(RepositoryReader.ymlToJson(filesStrings[0]));
-                    let variables: { key: string, value: string }[] = [];
+                    let variables: { key: string, value: string | null }[] = [];
                     if (filesData.hasVariables) {
                         const variablesObject: { [name: string]: string } = RepositoryReader.ymlToJson(filesStrings[1]);
                         variables = Object.keys(variablesObject).map(x => {
@@ -367,7 +367,28 @@ export class RepositoryReader {
                             };
                         })
                     }
+                    // we have to see if the serverless file has more parameters that might not be declared
+                    const undeclaredVariables: string[] = [];
+                    const regexVariables = new RegExp(/\$\{file\(\.\/variables\.yml\)\:(.*?)\}/gi);
+
+                    let match = regexVariables.exec(filesStrings[0]);
+                    while (match != null) {
+                        undeclaredVariables.push(match[1]);
+                        match = regexVariables.exec(filesStrings[0]);
+                    }
+                    console.log(undeclaredVariables);
+                    variables = undeclaredVariables.reduce((agg, current) => {
+                        const item = agg.find(x => x.key === current);
+                        if (!item) {
+                            agg.push({
+                                key: current,
+                                value: null
+                            });
+                        }
+                        return agg;
+                    }, variables);
                     console.log(JSON.stringify(variables));
+                    console.log(JSON.stringify(serverlessFile));
                     
                     this.databaseManagement
                         .setConnectionString(this.connectionString)

@@ -17,7 +17,7 @@ import { LogProgressComponent } from './install-databases/log-progress/log-progr
 import { SharedModule } from '../../shared/shared.module';
 import { databasesRouting } from './databases.routing';
 import { SweetAlert2Module } from '@toverux/ngx-sweetalert2';
-import { CommonModule } from '../../../../../node_modules/@angular/common';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
   declarations: [

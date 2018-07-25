@@ -236,6 +236,7 @@ export class ManagementEffects {
     )
     .pipe(
       switchMap((action: ManagementActions.ServiceRunRepoDiscoveryCompleteAction) => {
+        console.log(action.payload);
         return [
           {
             type: DatabaseActions.DATABASE_REPOSITORIES_UPDATED,

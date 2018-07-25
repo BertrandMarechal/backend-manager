@@ -367,7 +367,8 @@ export class RepositoryReader {
                             };
                         })
                     }
-
+                    console.log(JSON.stringify(variables));
+                    
                     this.databaseManagement
                         .setConnectionString(this.connectionString)
                         .execute('mgtf_update_middle_tier_files', [repoName, filesData.parentFolder, JSON.stringify(serverlessFile), JSON.stringify(variables)])

@@ -50,17 +50,27 @@ BEGIN
                     ) a
             ) b
             INNER JOIN function_data ON mlf_name = b."name"
+        ), insert_params as (
+                INSERT INTO mgtt_middle_tier_parameter_mtp (fk_mtf_mtp_middle_tier_file_id, mtp_parameter_name)
+                SELECT pk_mtf_id, v_variables.variables_values->>'key'
+                FROM insert_data_file
+                LEFT JOIN (
+                        SELECT json_array_elements(i_variables_file) as variables_values
+                ) v_variables ON true
+                returning pk_mtp_id, mtp_parameter_name
         )
-    INSERT INTO mgtt_middle_tier_parameter_mtp (fk_mtf_mtp_middle_tier_file_id, mtp_parameter_name, mtp_parameter_value)
-    SELECT pk_mtf_id, s_variables.var, v_variables.variables_values->>'value'
-    FROM insert_data_file
-    INNER JOIN (
-            SELECT REPLACE(json_array_elements(environmentVariables)::TEXT,'"','') as var
-            FROM file_data
-    ) s_variables ON TRUE
-    LEFT JOIN (
-            SELECT json_array_elements(i_variables_file) as variables_values
-    ) v_variables ON v_variables.variables_values->>'key' = s_variables.var;
+        INSERT INTO mgtt_middle_tier_parameter_environment_mpe (
+                fk_env_mpe_environment_id,
+                fk_mtp_mpe_middle_tier_parameter_id,
+                mpe_value
+        )
+        SELECT pk_env_id, pk_mtp_id, v_variables.variables_values->>'value'
+        FROM insert_params
+        INNER JOIN mgtt_environment_env ON env_name = 'dev'
+        LEFT JOIN (
+                SELECT json_array_elements(i_variables_file) as variables_values
+        ) v_variables ON v_variables.variables_values->>'key' = mtp_parameter_name
+        AND v_variables.variables_values->>'value' IS NOT NULL;
 
     RETURN 1;
 END;

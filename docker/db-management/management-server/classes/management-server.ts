@@ -143,6 +143,19 @@ export class ManagementServer {
                     res.send({ error: error });
                 });
         });
+        this.app.post('/serverless/setting/update', (req: any, res: any) => {
+            console.log('/serverless/setting/update');
+            const body: { settingName: string, settingValue: string, serviceName: string, environment: string } = req.body;
+            this.databaseManagement
+                .execute('mgtf_set_serverless_environment_setting', [body.serviceName, body.environment, body.settingName, body.settingValue])
+                .then(() => {
+                    res.send({ error: null, data: body });
+                }).catch((error) => {
+                    console.log(error);
+                    res.send({ error: error });
+                });
+        });
+        
         this.app.get('/databases/:repo/init/:dbalias', (req: any, res: any) => {
             console.log('/databases/' + req.params.repo + '/init');
             this.databaseManagement.createDatabaseFolderStructure(req.params.repo, req.params.dbalias)

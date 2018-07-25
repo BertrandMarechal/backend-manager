@@ -22,6 +22,7 @@ BEGIN
             )
         )
         from mgtt_environment_env
+        INNER JOIN mgtt_repository_rep ON pk_rep_id = i_repo_id
     );
 END;
 $CODE$ LANGUAGE plpgsql

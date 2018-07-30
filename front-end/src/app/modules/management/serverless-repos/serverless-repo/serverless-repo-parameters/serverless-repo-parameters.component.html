@@ -8,7 +8,8 @@
       <mat-progress-bar mode="indeterminate" *ngIf="updated === false"></mat-progress-bar>
       <mat-icon style="color: #57f751" *ngIf="updated === true">done</mat-icon>
       <span style="color: #a1a1a1" *ngIf="parameterValue && parameterValue !== parameter.value && !updated">
-        <span *ngIf="parameter.value">Previously: "{{parameter.value}}". </span>Press Enter to update.</span>
+        <span *ngIf="parameter.value">Previously: "{{parameter.value}}". </span>Press Enter to update.
+      </span>
     </td>
   </tr>
 </table>

@@ -76,9 +76,6 @@ export class ServerlessEffects {
               {
                 type: ServerlessActions.SERVICE_SAVE_SERVERLESS_SETTING_UPDATING_WIPE
               },
-              {
-                type: ManagementActions.ROUTER_GET_REPOSITORY_DATA
-              },
             ];
           }),
       );

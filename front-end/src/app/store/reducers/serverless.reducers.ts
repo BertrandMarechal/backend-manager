@@ -21,9 +21,9 @@ export const initialState: State = {
 };
 
 export function serverlessReducers(state = initialState, action: ServerlessActions.ServerlessActions) {
+    let selectedServerlessRepo: RepositoryFile = state.selectedServerlessRepo;
     switch (action.type) {
         case ServerlessActions.SERVERLESS_REPOSITORIES_UPDATED:
-            let selectedServerlessRepo: RepositoryFile = null;
             if (state.selectedServerlessRepo) {
                 selectedServerlessRepo = (action.payload || [])
                     .filter(x => x.isMiddleTier && x.name === state.selectedServerlessRepo.name)[0];
@@ -48,8 +48,23 @@ export function serverlessReducers(state = initialState, action: ServerlessActio
                 currentUpdatingSettings: action.payload
             };
         case ServerlessActions.SERVICE_SAVE_SERVERLESS_SETTING_COMPLETE:
+            if (selectedServerlessRepo) {
+                const serviceIndex = selectedServerlessRepo.middleTiers
+                    .findIndex(x => x.serviceName === state.currentUpdatingSettings.serviceName);
+                if (serviceIndex > -1) {
+                    selectedServerlessRepo.middleTiers[serviceIndex].parameters[state.currentUpdatingSettings.environment]
+                        .find(x => x.name === state.currentUpdatingSettings.settingName).value = state.currentUpdatingSettings.settingValue;
+                }
+            }
             return {
                 ...state,
+                serverlessRepos: state.serverlessRepos.map(x => {
+                    if (x.name === (selectedServerlessRepo || {name: null}).name) {
+                        return selectedServerlessRepo;
+                    }
+                    return x;
+                }),
+                selectedServerlessRepo: selectedServerlessRepo,
                 updatingSettings: {
                     ...state.updatingSettings,
                     [state.currentUpdatingSettings.serviceName + '-' + state.currentUpdatingSettings.settingName]: true

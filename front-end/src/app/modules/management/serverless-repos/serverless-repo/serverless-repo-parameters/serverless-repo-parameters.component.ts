@@ -42,14 +42,7 @@ export class ServerlessRepoParametersComponent implements OnInit, OnChanges {
   }
   onKeyUp(event: any) {
     this.parameterValue = event.target.value;
-    console.log(event);
     if (event.key && event.key === 'Enter') {
-      console.log({
-        settingName: event.target.name,
-        settingValue: event.target.value,
-        environment: this.environment,
-        serviceName: this.serviceName,
-      });
       this.store.dispatch(new ServerlessActions.SaveServerlessSettingPageAction({
         settingName: event.target.name,
         settingValue: event.target.value,

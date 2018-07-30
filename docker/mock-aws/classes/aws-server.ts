@@ -2,16 +2,24 @@ import express from 'express';
 import * as http from 'http';
 import * as bodyParser from 'body-parser';
 import { KmsServer } from './kms-server';
+import { LambdaServer } from './lambda-server';
+import { PostgresUtils } from '../utils/postgres.utils';
 
-
+const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
+const postgresPortToUse = process.argv[2] ? '5432' : '5433';
 
 export class AwsServer {
     private app: any;
     private server: any;
     private kmsServer: KmsServer;
+    private lambdaServer: LambdaServer;
+    private postgresUtils: PostgresUtils;
 
     constructor() {
-        this.kmsServer = new KmsServer();
+        this.postgresUtils = new PostgresUtils();
+        this.postgresUtils.setConnectionString(`postgres://root:route@${postgresDatabaseToUse}:${postgresPortToUse}/postgres`);
+        this.kmsServer = new KmsServer(this.postgresUtils);
+        this.lambdaServer = new LambdaServer(this.postgresUtils);
     }
 
     static logServerEvents(message: string) {
@@ -50,11 +58,11 @@ export class AwsServer {
     }
 
     private declareRoutes() {
-        
         this.app.get('/', (req: any, res: any) => {
             console.log('/');
             res.status(200).send('<h2>Hello</h2><a href="http://localhost:65065/kms/d1d5sa-d15sa3d8-d45s5de-d4s5a/get?path=' + encodeURIComponent('my/super/tree') + '">kms</a>');
         });
         this.kmsServer.declareRoutes(this.app);
+        this.lambdaServer.declareRoutes(this.app);
     }
 }

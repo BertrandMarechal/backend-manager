@@ -8,9 +8,8 @@ const postgresPortToUse = process.argv[2] ? '5432' : '5433';
 export class KmsServer {
     private postgresUtils: PostgresUtils;
 
-    constructor() {
-        this.postgresUtils = new PostgresUtils();
-        this.postgresUtils.setConnectionString(`postgres://root:route@${postgresDatabaseToUse}:5432/postgres`);
+    constructor(postgresUtils: PostgresUtils) {
+        this.postgresUtils = postgresUtils;
         this.runAwsDatabaseInstallationScript();
     }
     declareRoutes(app: any) {
@@ -29,7 +28,7 @@ export class KmsServer {
                 value: string
             } = req.body;
 
-            this.postgresUtils.setConnectionString(`postgres://root:route@${postgresDatabaseToUse}:5432/postgres`);
+            this.postgresUtils.setConnectionString(`postgres://root:route@${postgresDatabaseToUse}:${postgresPortToUse}/postgres`);
             this.postgresUtils.executeFunction('mgtf_save_kms_key')
                 .then((data: any) => {
                     AwsServer.sendDataBack(data, res);

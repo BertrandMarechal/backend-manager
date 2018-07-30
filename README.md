@@ -31,6 +31,7 @@ If you are using this project to create a new application, user the [local manag
 ## Database
 
 The database should be set up as follow :
+
 - The git databases repository is expected to contain :
   - A postgres folder, containing :
     - A release folder containing one folder per version (called x.y.z.a), containing a version.json file that we will talk about later
@@ -51,11 +52,11 @@ The database should be set up as follow :
 - [ ] Database upgrade script generation
 - [ ] Automatic installation of the current selected version on file change
 
-## Middle tier
+### Middletier
 
 - [x] Discover services
 
-## Extra
+### Extra
 
 - [ ] Mocking AWS services
   - [ ] Mock KMS

@@ -15,21 +15,27 @@ export class DatabaseService {
         private store: Store<fromDatabase.State>,
         private storeManagement: Store<fromManagement.State>
     ) {
-
+        this.localhostService.hookCallback('initialize database failed', (data) => {
+            this.store.dispatch(new DatabaseActions.ServiceInitializeDatabaseFailedAction(data));
+        });
+        this.localhostService.hookCallback('create database version failed', (data) => {
+            this.store.dispatch(new DatabaseActions.ServiceCreateNewVersionFailedAction(data));
+        });
+        this.localhostService.hookCallback('install database progress', (data) => {
+            this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseProgressAction(data));
+        });
+        this.localhostService.hookCallback('install database failed', (data) => {
+            console.log(data);
+            this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseFailedAction(data));
+        });
+        this.localhostService.hookCallback('install database complete', (data) => {
+            console.log(data);
+            this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseCompleteAction(data));
+        });
     }
 
     initializeDatabase(params: { repoName: string, dbAlias: string }): Promise<any> {
         return new Promise((resolve) => {
-            this.localhostService.hookCallback('initialize database failed', (data) => {
-                this.store.dispatch(new DatabaseActions.ServiceInitializeDatabaseFailedAction(data));
-            });
-            this.localhostService.hookCallback('run discovery complete', (data) => {
-                this.storeManagement.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
-                this.store.dispatch(new DatabaseActions.ServiceInitializeDatabaseCompleteAction());
-                this.localhostService.removeAllListeners([
-                    'initialize database failed',
-                    'run discovery complete']);
-            });
             this.localhostService.socketEmit('initialize database', params);
             resolve();
         });
@@ -37,16 +43,6 @@ export class DatabaseService {
 
     createNewDatabaseVersion(repoName: string): Promise<any> {
         return new Promise((resolve) => {
-            this.localhostService.hookCallback('create database version failed', (data) => {
-                this.store.dispatch(new DatabaseActions.ServiceCreateNewVersionFailedAction(data));
-            });
-            this.localhostService.hookCallback('run discovery complete', (data) => {
-                this.storeManagement.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
-                this.store.dispatch(new DatabaseActions.ServiceCreateNewVersionCompleteAction());
-                this.localhostService.removeAllListeners([
-                    'create database version failed',
-                    'run discovery complete']);
-            });
             this.localhostService.socketEmit('create database version', repoName);
             resolve();
         });
@@ -93,22 +89,6 @@ export class DatabaseService {
 
     installDatabase(params: { repoName?: string, version?: string, user?: string, fileName?: string, environment: string}): Promise<any> {
         return new Promise((resolve) => {
-            this.localhostService.hookCallback('install database progress', (data) => {
-                this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseProgressAction(data));
-            });
-            this.localhostService.hookCallback('install database failed', (data) => {
-                console.log(data);
-                this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseFailedAction(data));
-            });
-            this.localhostService.hookCallback('install database complete', (data) => {
-                console.log(data);
-                this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseCompleteAction(data));
-                this.localhostService.removeAllListeners([
-                    'install database progress',
-                    'install database failed',
-                    'install database complete']);
-            });
-
             this.localhostService.socketEmit('install database', params);
             resolve();
         });

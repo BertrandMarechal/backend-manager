@@ -15,10 +15,19 @@ export class ManagementService {
         setTimeout(() => {
             this.store.dispatch(new ManagementActions.GetEnvironmentsInitAction());
         }, 200);
+        this.localhostService.hookCallback('run discovery progress', (data) => {
+            this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryProgressAction(data));
+        });
+        this.localhostService.hookCallback('run discovery failed', (data) => {
+            this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryFailedAction(data));
+        });
+        this.localhostService.hookCallback('run discovery complete', (data) => {
+            this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
+        });
     }
 
-    getEnvironments(): Promise<{environmentName: string}[]> {
-        return <Promise<{environmentName: string}[]>>this.localhostService.get('environments');
+    getEnvironments(): Promise<{ environmentName: string }[]> {
+        return <Promise<{ environmentName: string }[]>>this.localhostService.get('environments');
     }
 
     getSettings(): Promise<ManagementSetting[]> {
@@ -37,19 +46,6 @@ export class ManagementService {
 
     runRepoDiscovery(): Promise<any> {
         return new Promise((resolve) => {
-            this.localhostService.hookCallback('run discovery progress', (data) => {
-                this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryProgressAction(data));
-            });
-            this.localhostService.hookCallback('run discovery failed', (data) => {
-                this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryFailedAction(data));
-            });
-            this.localhostService.hookCallback('run discovery complete', (data) => {
-                this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
-            this.localhostService.removeAllListeners([
-                'run discovery progress',
-                'run discovery failed',
-                'run discovery complete']);
-            });
             this.localhostService.socketEmit('run discovery', null);
             resolve();
         })

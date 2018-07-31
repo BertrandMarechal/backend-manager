@@ -181,4 +181,31 @@ export class FileUtils {
             fs.rmdirSync(path);
         }
     };
+    
+    static writeFileInItsFolder(fileName: string, fileData: any): Promise<null> {
+        const fileNameSplitted = fileName.split('/');
+        if (fileNameSplitted.length > 1) {
+            const folders = fileNameSplitted.splice(0, fileNameSplitted.length - 1);
+            let folderName = '';
+            for (let i = 0; i < folders.length; i++) {
+                folderName += (folderName? '/':'') + folders[i];
+                if (folders[i] !== '..' && folders[i] !== '.') {
+                    FileUtils.createFolderIfNotExistsSync(folderName);
+                }
+            }
+        }
+        return FileUtils.writeFile(fileName, fileData);
+    }
+    
+    static writeFile(fileName: string, fileData: any): Promise<null> {
+        return new Promise((resolve, reject) => {
+            fs.writeFile(fileName,fileData, (error) => {
+                if (error) {
+                    reject(fileName + ' ' + error);
+                } else {
+                    resolve();
+                }
+            }) ;
+        });
+    }
 }

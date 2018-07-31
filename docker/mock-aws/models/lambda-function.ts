@@ -46,6 +46,7 @@ export class LambdaFunction extends LambdaFunctionFromFile {
         this.parameters.forEach((x) => {
             process.env[x.name] = x.value;
         });
+        
         console.log(this.fileNameFormatedForRequire);
         
         const lambdaFunction = require(this.fileNameFormatedForRequire);

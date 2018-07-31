@@ -60,7 +60,7 @@ The database should be set up as follow :
 
 - [ ] Mocking AWS services
   - [ ] Mock KMS
-  - [ ] Mock Lambda
+  - [x] Mock Lambda
   - [ ] Mock S3
   - [ ] Mock Cognito
     - [ ] Mock User Pools

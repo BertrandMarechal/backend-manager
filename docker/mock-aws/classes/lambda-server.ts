@@ -17,38 +17,35 @@ export class LambdaServer {
     }
 
     declareRoutes(app: any) {
-        app.get('/lambda/:service/:function', (req: any, res: any) => {
+        app.post('/lambda/:service/:function', (req: any, res: any) => {
             this.postgresUtils.setConnectionString(`postgres://root:route@${postgresDatabaseToUse}:${postgresPortToUse}/postgres`);
             this.postgresUtils.executeFunction('mgtf_get_lambda_function', [req.params.service, req.params.function])
                 .then((result: {
-                        mgtf_get_lambda_function: {
-                                functionName: string,
-                                fileName: string,
-                                handlerFunctionName: string,
-                                parameters: {
-                                    name: string,
-                                    value: string
-                                }[]
-                            }
-                    }[]) => {
-                        console.log(result);
-                        
+                    mgtf_get_lambda_function: {
+                        functionName: string,
+                        fileName: string,
+                        handlerFunctionName: string,
+                        parameters: {
+                            name: string,
+                            value: string
+                        }[]
+                    }
+                }[]) => {
+                    console.log(result);
+
                     const lambdaFunction = new LambdaFunction(result[0].mgtf_get_lambda_function);
 
-                    // let body = req.body;
+                    let body = req.body;
                     console.log(colors.cyan(req.params.service) +
                         '-' + colors.green(req.params.function));
-                    // console.log(colors.yellow(JSON.stringify(body.event)));
                     lambdaFunction.call(
-                        // body.event,
-                        {},
-                        /* body.context ||*/ {identity: {cognitoIdentityId: '12345-12345-12345-12345'}},
+                        body.event,
+                        body.context || { identity: { cognitoIdentityId: '12345-12345-12345-12345' } },
                         (error: any, result: any) => {
-                            // setTimeout(() => {
                             this.testSet.push({
-                                // event: body.event,
-                                // context: body.context,
-                                // body: body,
+                                event: body.event,
+                                context: body.context,
+                                body: body,
                                 result: result,
                                 functionName: lambdaFunction.functionName,
                                 apiName: lambdaFunction.serviceName,

@@ -4,6 +4,7 @@ import * as bodyParser from 'body-parser';
 import { KmsServer } from './kms-server';
 import { LambdaServer } from './lambda-server';
 import { PostgresUtils } from '../utils/postgres.utils';
+import { S3Server } from './s3-server';
 
 const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
 const postgresPortToUse = process.argv[2] ? '5432' : '5433';
@@ -13,6 +14,7 @@ export class AwsServer {
     private server: any;
     private kmsServer: KmsServer;
     private lambdaServer: LambdaServer;
+    private s3Server: S3Server;
     private postgresUtils: PostgresUtils;
 
     constructor() {
@@ -20,6 +22,7 @@ export class AwsServer {
         this.postgresUtils.setConnectionString(`postgres://root:route@${postgresDatabaseToUse}:${postgresPortToUse}/postgres`);
         this.kmsServer = new KmsServer(this.postgresUtils);
         this.lambdaServer = new LambdaServer(this.postgresUtils);
+        this.s3Server = new S3Server(this.postgresUtils);
     }
 
     static logServerEvents(message: string) {
@@ -64,5 +67,6 @@ export class AwsServer {
         });
         this.kmsServer.declareRoutes(this.app);
         this.lambdaServer.declareRoutes(this.app);
+        this.s3Server.declareRoutes(this.app);
     }
 }

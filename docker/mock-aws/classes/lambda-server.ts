@@ -1,6 +1,7 @@
 import colors from "colors";
 import { PostgresUtils } from "../utils/postgres.utils";
 import { AwsServer } from "./aws-server";
+import { LambdaFunction } from "../models/lambda-function";
 
 const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
 const postgresPortToUse = process.argv[2] ? '5432' : '5433';
@@ -16,49 +17,49 @@ export class LambdaServer {
     }
 
     declareRoutes(app: any) {
-        app.post('/lambda/:service/:function', (req: any, res: any) => {
+        app.get('/lambda/:service/:function', (req: any, res: any) => {
             this.postgresUtils.setConnectionString(`postgres://root:route@${postgresDatabaseToUse}:${postgresPortToUse}/postgres`);
-            this.postgresUtils.executeFunction('mgtf_get_lambda_function')
-                .then((data: any) => {
-                    console.log(data);
-                    AwsServer.sendDataBack(data, res);
+            this.postgresUtils.executeFunction('mgtf_get_lambda_function', [req.params.service, req.params.function])
+                .then((result: {
+                        mgtf_get_lambda_function: {
+                                functionName: string,
+                                fileName: string,
+                                handlerFunctionName: string,
+                                parameters: {
+                                    name: string,
+                                    value: string
+                                }[]
+                            }
+                    }[]) => {
+                        console.log(result);
+                        
+                    const lambdaFunction = new LambdaFunction(result[0].mgtf_get_lambda_function);
+
+                    // let body = req.body;
+                    console.log(colors.cyan(req.params.service) +
+                        '-' + colors.green(req.params.function));
+                    // console.log(colors.yellow(JSON.stringify(body.event)));
+                    lambdaFunction.call(
+                        // body.event,
+                        {},
+                        /* body.context ||*/ {identity: {cognitoIdentityId: '12345-12345-12345-12345'}},
+                        (error: any, result: any) => {
+                            // setTimeout(() => {
+                            this.testSet.push({
+                                // event: body.event,
+                                // context: body.context,
+                                // body: body,
+                                result: result,
+                                functionName: lambdaFunction.functionName,
+                                apiName: lambdaFunction.serviceName,
+                            });
+                            AwsServer.sendDataBack(result, res);
+                        })
                 })
                 .catch((error: any) => {
+                    console.log(error);
                     AwsServer.sendErrorBack(error, res);
                 });
-        //     const lambdaFunction = this.functions.find((x: LambdaFunction) => {
-        //         return x.serviceName === req.params.service &&
-        //             x.functionName === req.params.function;
-        //     });
-        //     if (lambdaFunction) {
-        //         const functionApplication = Object.keys(this.settings).find(x => {
-        //             return lambdaFunction.fileName.indexOf(this.settings[x].middleTierRepoName) > -1;
-        //         });
-        //         let body = req.body;
-        //         console.log(colors.cyan(lambdaFunction.serviceName) +
-        //             '-' + colors.green(lambdaFunction.functionName));
-        //         // console.log(colors.yellow(JSON.stringify(body.event)));
-        //         lambdaFunction.call(
-        //             this.settings[<string>functionApplication],
-        //             body.event,
-        //             body.context || {identity: {cognitoIdentityId: 'bertrand.marechal@cordantgroup.com_cad'}},
-        //             (error: any, result: any) => {
-        //                 // setTimeout(() => {
-        //                 this.testSet.push({
-        //                     event: body.event,
-        //                     context: body.context,
-        //                     body: body,
-        //                     result: result,
-        //                     functionName: lambdaFunction.functionName,
-        //                     apiName: lambdaFunction.serviceName,
-        //                 });
-        //                 // console.log(colors.magenta(JSON.stringify(result)));
-        //                     res.send(result);
-        //                 // }, Math.random() * 250 + 100);
-        //             })
-        //     } else {
-        //         console.log(colors.red('Function not found : ' + req.params.service + '-' + req.params.function));
-        //     }
         });
     }
 }

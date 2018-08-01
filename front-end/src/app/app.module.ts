@@ -27,6 +27,7 @@ import { ServerlessEffects } from './store/effects/serverless.effects';
 import { serverlessReducers } from './store/reducers/serverless.reducers';
 import { DatabaseService } from './services/database.service';
 import { ServerlessService } from './services/serverless.service';
+import { LambdaService } from './services/lambda.service';
 
 @NgModule({
   declarations: [
@@ -58,7 +59,7 @@ import { ServerlessService } from './services/serverless.service';
     ReactiveFormsModule,
     SharedModule,
   ],
-  providers: [LocalhostService, ManagementService, DatabaseService, ServerlessService],
+  providers: [LocalhostService, ManagementService, DatabaseService, ServerlessService, LambdaService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -100,6 +100,17 @@ export class ManagementServerDisconnectedAction implements Action {
   readonly type = MANAGEMENT_SERVER_DISCONNECTED;
 }
 
+export const MANAGEMENT_LAMBDA_SERVER_CONNECTED =
+  '[Management] lambda server connected';
+export class ManagementLambdaServerConnectedAction implements Action {
+  readonly type = MANAGEMENT_LAMBDA_SERVER_CONNECTED;
+}
+export const MANAGEMENT_LAMBDA_SERVER_DISCONNECTED =
+  '[Management] lambda server disconnected';
+export class ManagementLambdaServerDisconnectedAction implements Action {
+  readonly type = MANAGEMENT_LAMBDA_SERVER_DISCONNECTED;
+}
+
 export const SELECT_ENVIRONMENT_PAGE_ACTION =
   '[Management Page] select environment';
 export class SelecteEnvironmentPageAction implements Action {
@@ -151,6 +162,8 @@ export type ManagementActions =
   | ServiceRunRepoDiscoveryFailedAction
   | ManagementServerConnectedAction
   | ManagementServerDisconnectedAction
+  | ManagementLambdaServerConnectedAction
+  | ManagementLambdaServerDisconnectedAction
   | SelecteEnvironmentPageAction
   | GetRepositoryDatarouterAction
   | ServiceGetRepositoryDataCompleteAction

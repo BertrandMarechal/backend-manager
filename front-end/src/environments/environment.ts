@@ -5,6 +5,7 @@
 export const environment = {
   production: false,
   nodeServerPort: 690,
+  lambdaServerPort: 65065
 };
 
 /*

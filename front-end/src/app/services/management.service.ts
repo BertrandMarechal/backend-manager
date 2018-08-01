@@ -15,13 +15,13 @@ export class ManagementService {
         setTimeout(() => {
             this.store.dispatch(new ManagementActions.GetEnvironmentsInitAction());
         }, 200);
-        this.localhostService.hookCallback('run discovery progress', (data) => {
+        this.localhostService.hookManagementCallback('run discovery progress', (data) => {
             this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryProgressAction(data));
         });
-        this.localhostService.hookCallback('run discovery failed', (data) => {
+        this.localhostService.hookManagementCallback('run discovery failed', (data) => {
             this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryFailedAction(data));
         });
-        this.localhostService.hookCallback('run discovery complete', (data) => {
+        this.localhostService.hookManagementCallback('run discovery complete', (data) => {
             this.store.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
         });
     }

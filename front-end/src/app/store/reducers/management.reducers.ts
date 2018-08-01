@@ -15,6 +15,7 @@ export interface State {
     runDiscoveryProgress: { stepName: string, complete: boolean }[];
     repositories: RepositoryFile[];
     serverConnected: boolean;
+    lambdaServerConnected: boolean;
     currentDiscoveryStep: { stepName: string, complete: boolean };
     environment: string;
     environments: {environmentName: string}[];
@@ -31,6 +32,7 @@ export const initialState: State = {
     runDiscoveryProgress: null,
     repositories: null,
     serverConnected: false,
+    lambdaServerConnected: false,
     currentDiscoveryStep: null,
     environment: 'local',
     environments: [],
@@ -145,6 +147,16 @@ export function managementeReducers(state = initialState, action: ManagementActi
             return {
                 ...state,
                 serverConnected: false
+            };
+        case ManagementActions.MANAGEMENT_LAMBDA_SERVER_CONNECTED:
+            return {
+                ...state,
+                lambdaServerConnected: true
+            };
+        case ManagementActions.MANAGEMENT_LAMBDA_SERVER_DISCONNECTED:
+            return {
+                ...state,
+                lambdaServerConnected: false
             };
         case ManagementActions.SELECT_ENVIRONMENT_PAGE_ACTION:
             return {

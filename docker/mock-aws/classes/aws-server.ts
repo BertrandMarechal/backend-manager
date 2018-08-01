@@ -5,6 +5,7 @@ import { KmsServer } from './kms-server';
 import { LambdaServer } from './lambda-server';
 import { PostgresUtils } from '../utils/postgres.utils';
 import { S3Server } from './s3-server';
+import IO from "socket.io";
 
 const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
 const postgresPortToUse = process.argv[2] ? '5432' : '5433';
@@ -16,8 +17,13 @@ export class AwsServer {
     private lambdaServer: LambdaServer;
     private s3Server: S3Server;
     private postgresUtils: PostgresUtils;
+    private io: any;
+    private clients: {
+        [id: string]: any
+    };
 
     constructor() {
+        this.clients = {};
         this.postgresUtils = new PostgresUtils();
         this.postgresUtils.setConnectionString(`postgres://root:route@${postgresDatabaseToUse}:${postgresPortToUse}/postgres`);
         this.kmsServer = new KmsServer(this.postgresUtils);
@@ -32,6 +38,7 @@ export class AwsServer {
     listenHere() {
         this.app = express();
         this.server = http.createServer(this.app);
+        this.io = IO(this.server);
         this.app.use((req: any, res: any, next: any) => {
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -42,6 +49,11 @@ export class AwsServer {
         this.app.use(bodyParser.json({ limit: '50mb' }));       // to support JSON-encoded bodies
 
         this.declareRoutes();
+        
+        this.io.on('connection', (client: any) => {
+            this.attachSocket(client);
+        });
+
         this.server.listen(65065, (error: any) => {
             if (error) {
                 console.log(error);
@@ -49,7 +61,26 @@ export class AwsServer {
                 console.log('listening on 65065');
             }
         });
+    }
+    private attachSocket(client: any) {
+        console.log('Client ' + client.conn.id + ' connected...');
+        this.clients[client.conn.id] = client;
 
+        client.on('disconnect', () => {
+            console.log('Client ' + client.conn.id + ' disconnected...');
+            delete this.clients[client.conn.id];
+        });
+
+        this.lambdaServer.attachSocket(client, this.emitFromSubServer.bind(this));
+    }
+
+    emitFromSubServer(event: string, data: any, clients?: string[]) {
+        if (!clients) {
+            clients = Object.keys(this.clients);
+        }
+        Object.keys(clients).forEach((clientId: string) => {
+            this.clients[clientId].emit(event, data);
+        });
     }
 
     static sendDataBack(result: any, res: any) {

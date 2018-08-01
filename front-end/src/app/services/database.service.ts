@@ -15,20 +15,20 @@ export class DatabaseService {
         private store: Store<fromDatabase.State>,
         private storeManagement: Store<fromManagement.State>
     ) {
-        this.localhostService.hookCallback('initialize database failed', (data) => {
+        this.localhostService.hookManagementCallback('initialize database failed', (data) => {
             this.store.dispatch(new DatabaseActions.ServiceInitializeDatabaseFailedAction(data));
         });
-        this.localhostService.hookCallback('create database version failed', (data) => {
+        this.localhostService.hookManagementCallback('create database version failed', (data) => {
             this.store.dispatch(new DatabaseActions.ServiceCreateNewVersionFailedAction(data));
         });
-        this.localhostService.hookCallback('install database progress', (data) => {
+        this.localhostService.hookManagementCallback('install database progress', (data) => {
             this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseProgressAction(data));
         });
-        this.localhostService.hookCallback('install database failed', (data) => {
+        this.localhostService.hookManagementCallback('install database failed', (data) => {
             console.log(data);
             this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseFailedAction(data));
         });
-        this.localhostService.hookCallback('install database complete', (data) => {
+        this.localhostService.hookManagementCallback('install database complete', (data) => {
             console.log(data);
             this.store.dispatch(new DatabaseActions.ServiceInstallDatabaseCompleteAction(data));
         });
@@ -50,10 +50,10 @@ export class DatabaseService {
 
     prepareUpdateObject(params: { repoName: string, fileName: string, mode: string }): Promise<any> {
         return new Promise((resolve) => {
-            this.localhostService.hookCallback('prepare update object failed', (data) => {
+            this.localhostService.hookManagementCallback('prepare update object failed', (data) => {
                 this.store.dispatch(new DatabaseActions.ServicePrepareUpdateObjectFailedAction(data));
             });
-            this.localhostService.hookCallback('run discovery complete', (data) => {
+            this.localhostService.hookManagementCallback('run discovery complete', (data) => {
                 this.storeManagement.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
                 this.store.dispatch(new DatabaseActions.ServiceCreateNewVersionCompleteAction());
                 this.localhostService.removeAllListeners([
@@ -68,10 +68,10 @@ export class DatabaseService {
     setVersionAsInstalled(params: { repoName: string, versionName: string }): Promise<any> {
         console.log(params);
         return new Promise((resolve) => {
-            this.localhostService.hookCallback('set version as installed failed', (data) => {
+            this.localhostService.hookManagementCallback('set version as installed failed', (data) => {
                 this.store.dispatch(new DatabaseActions.ServicePrepareUpdateObjectFailedAction(data));
             });
-            this.localhostService.hookCallback('run discovery complete', (data) => {
+            this.localhostService.hookManagementCallback('run discovery complete', (data) => {
                 this.storeManagement.dispatch(new ManagementActions.ServiceRunRepoDiscoveryCompleteAction(data));
                 this.store.dispatch(new DatabaseActions.ServiceCreateNewVersionCompleteAction());
                 this.localhostService.removeAllListeners([

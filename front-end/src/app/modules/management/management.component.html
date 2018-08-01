@@ -1,7 +1,7 @@
 <div class="bodyComponent">
   <mat-toolbar color="primary" class="mat-elevation-z8">
     <mat-toolbar-row>
-      <mat-icon class="example-icon" style="cursor: pointer; margin-right: 10px;" (click)="navbarOpen = !navbarOpen">
+      <mat-icon style="cursor: pointer; margin-right: 10px;" (click)="navbarOpen = !navbarOpen">
         menu
       </mat-icon>
       <span>Repo management</span>
@@ -10,11 +10,14 @@
         <button mat-menu-item (click)="onSelecteEnvironment(environment.environmentName)" *ngFor="let environment of (management$|async)?.environments">{{environment.environmentName}}</button>
       </mat-menu>
       <span class="spacer"></span>
+      <button mat-button *ngIf="(management$|async)?.lambdaServerConnected">
+        <mat-icon>functions</mat-icon>
+      </button>
       <button mat-button (click)="onRunDiscovery()">
-        <mat-icon class="example-icon">youtube_searched_for</mat-icon>
+        <mat-icon>youtube_searched_for</mat-icon>
       </button>
       <button mat-button routerLink="settings">
-        <mat-icon class="example-icon">settings</mat-icon>
+        <mat-icon>settings</mat-icon>
       </button>
     </mat-toolbar-row>
   </mat-toolbar>

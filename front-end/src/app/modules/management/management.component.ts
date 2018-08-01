@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import * as fromManagement from '../../store/reducers/management.reducers';
 import * as fromDatabase from '../../store/reducers/database.reducers';
 import * as fromServerless from '../../store/reducers/serverless.reducers';
+import * as fromAws from '../../store/reducers/aws.reducers';
 import * as ManagementActions from '../../store/actions/management.actions';
 import * as DatabaseActions from '../../store/actions/database.actions';
 import * as ServerlessActions from '../../store/actions/serverless.actions';
+import * as AwsActions from '../../store/actions/aws.actions';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { RepositoryFile } from '../../models/database.model';
@@ -19,6 +21,7 @@ export class ManagementComponent implements OnInit {
   management$: Observable<fromManagement.State>;
   databases$: Observable<fromDatabase.State>;
   serverless$: Observable<fromServerless.State>;
+  aws$: Observable<fromAws.State>;
   databasesOpen: boolean;
   middleTiersOpen: boolean;
   navbarOpen: boolean;
@@ -33,6 +36,7 @@ export class ManagementComponent implements OnInit {
     this.management$ = this.store.select('management');
     this.databases$ = this.store.select('databaseManagement');
     this.serverless$ = this.store.select('serverless');
+    this.aws$ = this.store.select('aws');
     this.sub = this.management$.subscribe((state: fromManagement.State) => {
       if (!this.navbarOpen && state.serverConnected) {
         if (this.sub) {
@@ -59,5 +63,9 @@ export class ManagementComponent implements OnInit {
 
   onSelectServerlessRepo(serverlessRepo: RepositoryFile) {
     this.store.dispatch(new ServerlessActions.SelecteServerlessPageAction(serverlessRepo));
+  }
+
+  onClickFunctions() {
+    this.store.dispatch(new AwsActions.PageNavigateToFunctions());
   }
 }

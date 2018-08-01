@@ -72,13 +72,16 @@ export class AwsServer {
         });
 
         this.lambdaServer.attachSocket(client, this.emitFromSubServer.bind(this));
+        this.s3Server.attachSocket(client, this.emitFromSubServer.bind(this));
     }
 
     emitFromSubServer(event: string, data: any, clients?: string[]) {
         if (!clients) {
             clients = Object.keys(this.clients);
         }
-        Object.keys(clients).forEach((clientId: string) => {
+        clients.forEach((clientId: string) => {
+            console.log(clientId, event, data);
+            
             this.clients[clientId].emit(event, data);
         });
     }

@@ -1,15 +1,11 @@
 import { AwsS3 } from "../models/aws-s3.model";
 import { PostgresUtils } from "../utils/postgres.utils";
 import { LambdaFunction } from "../models/lambda-function";
+import { SubServerCommon } from "./sub-server-common";
 
-const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
-const postgresPortToUse = process.argv[2] ? '5432' : '5433';
-
-export class S3Server {
-    private postgresUtils: PostgresUtils;
-
+export class S3Server extends SubServerCommon {
     constructor(postgresUtils: PostgresUtils) {
-        this.postgresUtils = postgresUtils;
+        super(postgresUtils)
     }
 
     declareRoutes(app: any) {
@@ -17,6 +13,7 @@ export class S3Server {
             let body = req.body;
             const awsS3 = new AwsS3();
             awsS3.putObject(body);
+            this.emitFromSubServer('s3 object created', {bucket: body.Bucket, key: body.Key});
             res.send({Payload: 'ok'});
             this.callLambdaPostEVent(body, 's3:ObjectCreated');
         });
@@ -24,13 +21,14 @@ export class S3Server {
             let body = req.body;
             const awsS3 = new AwsS3();
             awsS3.deleteObject(body);
+            this.emitFromSubServer('s3 object deleted', {bucket: body.Bucket, key: body.Key});
             res.send({Payload: 'ok'});
             this.callLambdaPostEVent(body, 's3:ObjectDeleted');
         });
     }
 
     private callLambdaPostEVent(body: any, event: string) {
-        this.postgresUtils.setConnectionString(`postgres://root:route@${postgresDatabaseToUse}:${postgresPortToUse}/postgres`);
+        this.setConnectionString();
         this.postgresUtils.executeFunction('mgtf_get_lambda_functions_for_s3_event', [event, body.Key, body.Bucket])
             .then((result: {
                 mgtf_get_lambda_functions_for_s3_event: {
@@ -57,5 +55,9 @@ export class S3Server {
             .catch((error: any) => {
                 console.log(error);
             });
+    }
+    
+    attachSocket(client: any, emitFromSubServer: (event: string, data: any, clients?: string[]) => void) {
+        super.attachSocket(client, emitFromSubServer);
     }
 }

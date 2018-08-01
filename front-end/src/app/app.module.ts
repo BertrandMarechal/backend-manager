@@ -28,6 +28,8 @@ import { serverlessReducers } from './store/reducers/serverless.reducers';
 import { DatabaseService } from './services/database.service';
 import { ServerlessService } from './services/serverless.service';
 import { LambdaService } from './services/lambda.service';
+import { AwsEffects } from './store/effects/aws.effects';
+import { awsReducers } from './store/reducers/aws.reducers';
 
 @NgModule({
   declarations: [
@@ -50,9 +52,11 @@ import { LambdaService } from './services/lambda.service';
     StoreModule.forFeature('management', managementeReducers),
     StoreModule.forFeature('databaseManagement', databaseReducers),
     StoreModule.forFeature('serverless', serverlessReducers),
+    StoreModule.forFeature('aws', awsReducers),
     EffectsModule.forFeature([
       ManagementEffects,
       DatabaseEffects,
+      AwsEffects,
       ServerlessEffects
     ]),
     MaterialModule,

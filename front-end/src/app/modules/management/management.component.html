@@ -10,7 +10,7 @@
         <button mat-menu-item (click)="onSelecteEnvironment(environment.environmentName)" *ngFor="let environment of (management$|async)?.environments">{{environment.environmentName}}</button>
       </mat-menu>
       <span class="spacer"></span>
-      <button mat-button *ngIf="(management$|async)?.lambdaServerConnected">
+      <button mat-button *ngIf="(management$|async)?.lambdaServerConnected" (click)="onClickFunctions()">
         <mat-icon>functions</mat-icon>
       </button>
       <button mat-button (click)="onRunDiscovery()">

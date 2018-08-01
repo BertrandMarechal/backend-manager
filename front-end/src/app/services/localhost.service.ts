@@ -105,11 +105,13 @@ export class LocalhostService {
     });
   }
   hookManagementCallback(event: string, callback) {
+    console.log('Hooking ' + event);
     this.socketManagement.on(event, (data) => {
       callback(data);
     });
   }
   hookLambdaCallback(event: string, callback) {
+    console.log('Hooking ' + event);
     this.socketLambda.on(event, (data) => {
       callback(data);
     });

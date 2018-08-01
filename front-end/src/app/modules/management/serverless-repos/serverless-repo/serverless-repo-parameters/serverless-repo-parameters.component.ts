@@ -1,9 +1,9 @@
 import { Component, OnInit, Input, Output, SimpleChanges, OnChanges } from '@angular/core';
 import { LambdaFunctionParameter } from '../../../../../models/database.model';
-import { Observable } from '../../../../../../../node_modules/rxjs';
+import { Observable } from 'rxjs';
 import * as fromServerless from '../../../../../store/reducers/serverless.reducers';
 import * as ServerlessActions from '../../../../../store/actions/serverless.actions';
-import { Store } from '../../../../../../../node_modules/@ngrx/store';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-serverless-repo-parameters',

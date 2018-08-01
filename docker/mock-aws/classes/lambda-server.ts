@@ -2,28 +2,26 @@ import colors from "colors";
 import { PostgresUtils } from "../utils/postgres.utils";
 import { AwsServer } from "./aws-server";
 import { LambdaFunction } from "../models/lambda-function";
+import { SubServerCommon } from "./sub-server-common";
 
-const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
-const postgresPortToUse = process.argv[2] ? '5432' : '5433';
-
-export class LambdaServer {
+export class LambdaServer extends SubServerCommon {
     testSet: any[];
-
-    private postgresUtils: PostgresUtils;
-    private emitFromSubServer: (event: string, data: any, clients?: string[]) => void;
-
     constructor(postgresUtils: PostgresUtils) {
-        this.postgresUtils = postgresUtils;
+        super(postgresUtils);
         this.testSet = [];
-        this.emitFromSubServer = (event: string, data: any, clients?: string[]) => {
-            console.log('Super emit not defined yet');
-        };
     }
 
     declareRoutes(app: any) {
+        app.get('/lambda', (req: any, res: any) => {
+            res.send('<a href="/lambda/test-u/getuser">test getuser</a>');
+        });
+        app.get('/lambda/:service/:function', (req: any, res: any) => {
+            this.emitFromSubServer('lambda function called', {functionName: req.params.function, serviceName: req.params.service});
+            res.send('<a href="/lambda">back</a>');
+        });
         app.post('/lambda/:service/:function', (req: any, res: any) => {
             this.emitFromSubServer('lambda function called', {functionName: req.params.function, serviceName: req.params.service});
-            this.postgresUtils.setConnectionString(`postgres://root:route@${postgresDatabaseToUse}:${postgresPortToUse}/postgres`);
+            this.setConnectionString();
             this.postgresUtils.executeFunction('mgtf_get_lambda_function', [req.params.service, req.params.function])
                 .then((result: {
                     mgtf_get_lambda_function: {
@@ -65,10 +63,6 @@ export class LambdaServer {
     }
 
     attachSocket(client: any, emitFromSubServer: (event: string, data: any, clients?: string[]) => void) {
-        this.emitFromSubServer = emitFromSubServer;
-        // client.on('disconnect', () => {
-        //     console.log('Client ' + client.conn.id + ' disconnected...');
-        //     delete this.clients[client.conn.id];
-        // });
+        super.attachSocket(client, emitFromSubServer);
     }
 }

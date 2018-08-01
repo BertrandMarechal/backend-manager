@@ -30,6 +30,10 @@ const routes: Routes = [
         loadChildren: './modules/management/databases/databases.module#DatabasesModule'
       },
       {
+        path: 'aws',
+        loadChildren: './modules/management/aws/aws.module#AwsModule'
+      },
+      {
         path: 'serverless-repos',
         loadChildren: './modules/management/serverless-repos/serverless-repos.module#ServerlessReposModule'
       },

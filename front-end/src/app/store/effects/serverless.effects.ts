@@ -7,7 +7,7 @@ import * as ManagementActions from '../actions/management.actions';
 import * as fromServerless from '../reducers/serverless.reducers';
 import { withLatestFrom, switchMap, mergeMap, catchError, delay } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { fromPromise } from '../../../../node_modules/rxjs/internal-compatibility';
+import { fromPromise } from 'rxjs/internal-compatibility';
 import { ServerlessService } from '../../services/serverless.service';
 import swal from 'sweetalert2';
 

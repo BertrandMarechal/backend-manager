@@ -100,10 +100,11 @@ BEGIN
         SELECT pk_env_id, pk_mtp_id,env_name
         FROM mgtt_environment_env
         INNER JOIN insert_data_file ON true
-        LEFT JOIN insert_param_env ON true
-        INNER JOIN mgtt_middle_tier_parameter_mtp
-                ON insert_data_file.pk_mtf_id = fk_mtf_mtp_middle_tier_file_id
-                AND mtp_parameter_name = 'stage'
+        INNER JOIN insert_param_env ON true
+        LEFT JOIN insert_params ON mtp_parameter_name = 'stage'
+        -- INNER JOIN mgtt_middle_tier_parameter_mtp
+        --         ON insert_data_file.pk_mtf_id = fk_mtf_mtp_middle_tier_file_id
+        --         AND 
         ON CONFLICT(fk_env_mpe_environment_id,fk_mtp_mpe_middle_tier_parameter_id) DO NOTHING;
 
     RETURN 1;

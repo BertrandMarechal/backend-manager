@@ -11,7 +11,8 @@
       </mat-menu>
       <span class="spacer"></span>
       <button mat-button *ngIf="(management$|async)?.lambdaServerConnected" (click)="onClickFunctions()">
-        <mat-icon>functions</mat-icon>
+        <mat-icon *ngIf="(aws$|async)?.lambdaCallCount > 0" [matBadge]="(aws$|async)?.lambdaCallCount" matBadgeColor="accent">functions</mat-icon>
+        <mat-icon *ngIf="(aws$|async)?.lambdaCallCount === 0">functions</mat-icon>
       </button>
       <button mat-button (click)="onRunDiscovery()">
         <mat-icon>youtube_searched_for</mat-icon>

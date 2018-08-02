@@ -8,6 +8,7 @@ BEGIN
         SELECT
             json_build_object(
                 'functionName', mlf_name,
+                'serviceName', mtf_service_name,
                 'fileName', mtf_file_name || '/' || mlf_file_name,
                 'handlerFunctionName', mlf_handler_name,
                 'parameters', (

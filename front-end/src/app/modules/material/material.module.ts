@@ -16,6 +16,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatTableModule } from '@angular/material/table';
 
 @NgModule({
   imports: [
@@ -36,6 +37,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
     MatBadgeModule,
     MatChipsModule,
     MatSidenavModule,
+    MatTableModule,
   ],
   declarations: [],
   exports: [
@@ -55,6 +57,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
     MatBadgeModule,
     MatChipsModule,
     MatSidenavModule,
+    MatTableModule,
   ]
 })
 export class MaterialModule { }

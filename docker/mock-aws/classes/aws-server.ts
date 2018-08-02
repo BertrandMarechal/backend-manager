@@ -63,11 +63,11 @@ export class AwsServer {
         });
     }
     private attachSocket(client: any) {
-        console.log('Client ' + client.conn.id + ' connected...');
+        console.log('Client connected: ' + client.conn.id + '');
         this.clients[client.conn.id] = client;
 
         client.on('disconnect', () => {
-            console.log('Client ' + client.conn.id + ' disconnected...');
+            console.log('Client disconnected: ' + client.conn.id + '');
             delete this.clients[client.conn.id];
         });
 
@@ -81,7 +81,6 @@ export class AwsServer {
         }
         clients.forEach((clientId: string) => {
             console.log(clientId, event, data);
-            
             this.clients[clientId].emit(event, data);
         });
     }

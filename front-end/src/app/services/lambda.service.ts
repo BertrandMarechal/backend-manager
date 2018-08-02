@@ -14,6 +14,7 @@ export class LambdaService {
             this.store.dispatch(new AwsActions.LambdaServiceFunctionCalled(data));
         });
         this.localhostService.hookLambdaCallback('lambda function result', (data) => {
+            console.log(data);
             this.store.dispatch(new AwsActions.LambdaServiceFunctionResult(data));
         });
     }

@@ -22,6 +22,7 @@ export class PostgresUtils {
             }
             this.db = this.connections[this.connectionString];
         }
+        console.log(this.connectionString);
         return this;
     }
 

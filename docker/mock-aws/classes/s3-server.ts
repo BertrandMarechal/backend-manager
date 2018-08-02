@@ -17,6 +17,17 @@ export class S3Server extends SubServerCommon {
             res.send({Payload: 'ok'});
             this.callLambdaPostEVent(body, 's3:ObjectCreated');
         });
+        app.post('/s3/getObject', (req: any, res: any) => {
+            let body: {
+                Bucket: string,
+                Key: string
+            } = req.body;
+            const awsS3 = new AwsS3();
+
+            awsS3.getObject(body).then((data) => {
+                res.send(data);
+            });
+        });
         app.post('/s3/deleteObject', (req: any, res: any) => {
             let body = req.body;
             const awsS3 = new AwsS3();
@@ -42,12 +53,24 @@ export class S3Server extends SubServerCommon {
                 }[]
             }[]) => {
                 console.log(result);
+                const s3Event = {
+                    Records: [{
+                        s3: {
+                            bucket: {
+                                name: body.Bucket
+                            },
+                            object: {
+                                key: body.Key
+                            }
+                        }
+                    }]
+                };
 
                 const lambdaFunctions = result[0].mgtf_get_lambda_functions_for_s3_event.map(x => new LambdaFunction(x));
 
                 lambdaFunctions.forEach((lambdaFunction) => {
                     lambdaFunction.call(
-                        body.event,
+                        s3Event,
                         body.context || { identity: { cognitoIdentityId: '12345-12345-12345-12345' } },
                         (error: any, result: any) => {})
                 })

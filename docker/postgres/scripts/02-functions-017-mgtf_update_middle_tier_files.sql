@@ -76,19 +76,35 @@ BEGIN
                         SELECT json_array_elements(i_variables_file) as variables_values
                 ) v_variables ON true
                 returning pk_mtp_id, mtp_parameter_name
+        ), insert_param_env as (
+                INSERT INTO mgtt_middle_tier_parameter_environment_mpe (
+                        fk_env_mpe_environment_id,
+                        fk_mtp_mpe_middle_tier_parameter_id,
+                        mpe_value
+                )
+                SELECT pk_env_id, pk_mtp_id, v_variables.variables_values->>'value'
+                FROM insert_params
+                INNER JOIN mgtt_environment_env ON env_name = 'dev'
+                LEFT JOIN (
+                        SELECT json_array_elements(i_variables_file) as variables_values
+                ) v_variables ON v_variables.variables_values->>'key' = mtp_parameter_name
+                AND v_variables.variables_values->>'value' IS NOT NULL
+                RETURNING pk_mpe_id
         )
+        -- update the stages for each env
         INSERT INTO mgtt_middle_tier_parameter_environment_mpe (
                 fk_env_mpe_environment_id,
                 fk_mtp_mpe_middle_tier_parameter_id,
                 mpe_value
         )
-        SELECT pk_env_id, pk_mtp_id, v_variables.variables_values->>'value'
-        FROM insert_params
-        INNER JOIN mgtt_environment_env ON env_name = 'dev'
-        LEFT JOIN (
-                SELECT json_array_elements(i_variables_file) as variables_values
-        ) v_variables ON v_variables.variables_values->>'key' = mtp_parameter_name
-        AND v_variables.variables_values->>'value' IS NOT NULL;
+        SELECT pk_env_id, pk_mtp_id,env_name
+        FROM mgtt_environment_env
+        INNER JOIN insert_data_file ON true
+        LEFT JOIN insert_param_env ON true
+        INNER JOIN mgtt_middle_tier_parameter_mtp
+                ON insert_data_file.pk_mtf_id = fk_mtf_mtp_middle_tier_file_id
+                AND mtp_parameter_name = 'stage'
+        ON CONFLICT(fk_env_mpe_environment_id,fk_mtp_mpe_middle_tier_parameter_id) DO NOTHING;
 
     RETURN 1;
 END;

@@ -1,4 +1,5 @@
 import {FileUtils} from "../utils/file.utils";
+import fs from 'fs';
 
 export class AwsS3 {
     putObject(params: any): Promise<any> {
@@ -26,4 +27,18 @@ export class AwsS3 {
             resolve();
         });
     };
+    getObject(body: {
+        Bucket: string,
+        Key: string
+    }): Promise<{Body: any, Metadata: any}> {
+        return new Promise((resolve, reject) => {
+            fs.readFile(__dirname + '../../temp/s3/' + body.Bucket + '/' + body.Key, (error, data) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({Body: data, Metadata: null});
+                }
+            })
+        });
+    }
 }

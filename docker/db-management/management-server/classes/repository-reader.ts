@@ -7,8 +7,9 @@ import { DatabaseVersionFileData, DatabaseVersionInformation } from "../../commo
 import * as path from "path";
 import { ServerlessFile } from "../models/serverless-file.model";
 
-const originFolder = process.argv[2] ? '../../../' : '../repos/';
-const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
+// const originFolder = process.argv[2] ? '../../../' : '../repos/';
+const originFolder = process.argv[3] || '../repos/';
+const postgresDatabaseToUse = process.argv[3] ? 'localhost' : 'postgresdb';
 
 export class RepositoryReader {
     private databaseManagement: DatabaseManagement;
@@ -23,7 +24,7 @@ export class RepositoryReader {
         this.databaseManagement = databaseManagement;
         this.settings = [];
         this.variablesForRepo = [];
-        this.databaseExtension = 'database';
+        this.databaseExtension = 'database';        
     }
 
     private static processFileName(fileName: string) {
@@ -297,14 +298,14 @@ export class RepositoryReader {
             )
                 .then((fileLists: string[][]) => {
                     const files = [
-                        ...fileLists[0].map(x => {
+                        ...fileLists[0].filter(x=> x.indexOf('.bak') === -1).map(x => {
                             return {
                                 type: 'serverless',
                                 location: RepositoryReader.processFileName(x),
                                 parentFolder: RepositoryReader.processFileName(x).replace('/serverless.yml', '')
                             }
                         }),
-                        ...fileLists[1].map(x => {
+                        ...fileLists[1].filter(x=> x.indexOf('.bak') === -1).map(x => {
                             return {
                                 type: 'variables',
                                 location: RepositoryReader.processFileName(x),
@@ -377,7 +378,6 @@ export class RepositoryReader {
                         undeclaredVariables.push(match[1]);
                         match = regexVariables.exec(filesStrings[0]);
                     }
-                    console.log(undeclaredVariables);
                     variables = undeclaredVariables.reduce((agg, current) => {
                         const item = agg.find(x => x.key === current);
                         if (!item) {
@@ -389,8 +389,6 @@ export class RepositoryReader {
                         }
                         return agg;
                     }, variables);
-                    console.log(JSON.stringify(variables));
-                    console.log(JSON.stringify(serverlessFile));
                     
                     this.databaseManagement
                         .setConnectionString(this.connectionString)

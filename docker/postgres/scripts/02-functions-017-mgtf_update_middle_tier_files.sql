@@ -75,6 +75,7 @@ BEGIN
                 LEFT JOIN (
                         SELECT json_array_elements(i_variables_file) as variables_values
                 ) v_variables ON true
+                WHERE v_variables.variables_values->>'key' is not null
                 returning pk_mtp_id, mtp_parameter_name
         ), insert_param_env as (
                 INSERT INTO mgtt_middle_tier_parameter_environment_mpe (
@@ -104,7 +105,8 @@ BEGIN
         LEFT JOIN insert_params ON mtp_parameter_name = 'stage'
         -- INNER JOIN mgtt_middle_tier_parameter_mtp
         --         ON insert_data_file.pk_mtf_id = fk_mtf_mtp_middle_tier_file_id
-        --         AND 
+        --         AND
+        WHERE pk_mtp_id is not null
         ON CONFLICT(fk_env_mpe_environment_id,fk_mtp_mpe_middle_tier_parameter_id) DO NOTHING;
 
     RETURN 1;

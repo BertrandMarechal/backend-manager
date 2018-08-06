@@ -35,24 +35,6 @@
               </mat-panel-description>
             </mat-expansion-panel-header>
 
-            <mat-accordion *ngIf="dbVersion.databaseFiles.length > 0">
-              <mat-expansion-panel *ngFor="let dbFile of dbVersion.databaseFiles" class="example-headers-align" hideToggle>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    {{dbFile.filePath}}
-                  </mat-panel-title>
-                  <mat-panel-description>
-                    {{dbFile.position}}
-                    <mat-icon>insert_drive_file</mat-icon>
-                  </mat-panel-description>
-                </mat-expansion-panel-header>
-                <mat-action-row>
-                  <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version, database: dbVersion.databaseToUse, fileName: dbFile.filePath})">Run script</button>
-                </mat-action-row>
-
-              </mat-expansion-panel>
-            </mat-accordion>
-
             <mat-action-row>
               <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version, database: dbVersion.databaseToUse})">Install version step</button>
             </mat-action-row>

@@ -12,7 +12,8 @@ BEGIN
         THEN
                   UPDATE temp_database_scripts
                   SET db_position = 0
-                  WHERE depending IS NULL;
+                  WHERE depending IS NULL
+                  AND dbv_database_to_use = 'postgres';
                   
                   UPDATE temp_database_scripts
                   SET dependency_position = 0

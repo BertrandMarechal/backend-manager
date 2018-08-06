@@ -5,8 +5,8 @@ import { promises } from "fs";
 import { Setting } from "../models/settings.model";
 import { resolve } from "url";
 
-const originFolder = process.argv[2] ? '../../../' : '../repos/';
-const postgresDatabaseToUse = process.argv[2] ? 'localhost' : 'postgresdb';
+const originFolder = process.argv[3] || '../repos/';
+const postgresDatabaseToUse = process.argv[3] ? 'localhost' : 'postgresdb';
 
 interface FolderStructureItem {
     folderName?: string,

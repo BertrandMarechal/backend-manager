@@ -15,7 +15,6 @@
                           {{middleTier.fileName}}
                       </mat-panel-description>
                   </mat-expansion-panel-header>
-          
                   <app-serverless-repo-parameters
                     *ngFor="let parameter of middleTier.parameters[(management$|async)?.environment]"
                     [environment]="(management$|async)?.environment"
@@ -25,11 +24,5 @@
               </mat-expansion-panel>
           </mat-accordion>
       </div>
-
-
-
-
-
-
   </mat-card-content>
 </mat-card>

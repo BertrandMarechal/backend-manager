@@ -129,6 +129,6 @@ BEGIN
                 )
         FROM raw_data rd1
         GROUP BY db_position, rep_folder_name, dbv_version_id, dbv_database_to_use, dbv_user_to_use
-        ORDER BY db_position, rep_folder_name, dbv_version_id, dbv_database_to_use, dbv_user_to_use;
+        ORDER BY db_position, rep_folder_name, dbv_version_id, dbv_database_to_use desc, dbv_user_to_use;
 END;
 $CODE$ LANGUAGE plpgsql

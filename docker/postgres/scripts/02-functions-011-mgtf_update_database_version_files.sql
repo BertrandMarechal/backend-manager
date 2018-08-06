@@ -60,23 +60,30 @@ BEGIN
             version->>'fileList' as file_list
         FROM json_to_recordset(i_files) t("fileName" TEXT, version json)
     ), ready_to_insert_data as (
-        SELECT
-            repo_name,
-            version_id,
-            pk_dbv_id,
-            user_to_use,
-            database_to_use,
-            dependencies,
-            REPLACE(json_array_elements(file_list::json)::TEXT,'"','') as sql_file_name,
-            row_number() OVER (PARTITION BY repo_name,version_id, user_to_use, database_to_use ORDER BY REPLACE(json_array_elements(file_list::json)::TEXT,'"','')) AS position
-        from raw_data
-        inner join mgtt_database_version_dbv
-            ON dbv_version_id = version_id
-            AND COALESCE(dbv_database_to_use,'application database') = database_to_use
-            AND dbv_user_to_use = user_to_use
-        INNER JOIN mgtt_repository_rep
-            ON fk_rep_dbv_repo_id = pk_rep_id
-            AND rep_folder_name = repo_name
+        select *,
+        row_number() OVER (PARTITION BY repo_name,version_id, user_to_use, database_to_use ORDER BY position_1) AS "position"
+        from  (
+                select *,
+                row_number() OVER () AS "position_1"
+                from (
+                    SELECT
+                        repo_name,
+                        version_id,
+                        pk_dbv_id,
+                        user_to_use,
+                        database_to_use,
+                        dependencies,
+                        REPLACE(json_array_elements(file_list::json)::TEXT,'"','') as sql_file_name
+                    from raw_data
+                    inner join mgtt_database_version_dbv
+                        ON dbv_version_id = version_id
+                        AND COALESCE(dbv_database_to_use,'application database') = database_to_use
+                        AND dbv_user_to_use = user_to_use
+                    INNER JOIN mgtt_repository_rep
+                        ON fk_rep_dbv_repo_id = pk_rep_id
+                        AND rep_folder_name = repo_name
+                ) a
+        ) b
     )
     INSERT INTO mgtt_database_version_file_dvf (fk_dbv_dvf_database_version_id, dvf_file_name, dvf_position)
     SELECT pk_dbv_id, sql_file_name, position

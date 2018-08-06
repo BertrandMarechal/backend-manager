@@ -4,5 +4,5 @@ create table if not exists mgtt_middle_tier_function_mlf (
     mlf_name TEXT NOT NULL,
     mlf_file_name TEXT NOT NULL,
     mlf_handler_name TEXT NOT NULL,
-    UNIQUE(fk_mtf_mlf_middle_tier_file_id,mlf_file_name)
+    UNIQUE(fk_mtf_mlf_middle_tier_file_id,mlf_name)
 );

@@ -46,7 +46,7 @@ export class DatabaseInstallationProgress implements IDatabaseInstallationProgre
                             current = {
                                 ...current,
                                 totalFiles: current.totalFiles + 1,
-                                totalFilesDone: current.totalFiles + (x.done ? 1 : 0)
+                                totalFilesDone: current.totalFilesDone + (x.done ? 1 : 0)
                             };
                             current.progress = current.totalFiles > 0 ? (current.totalFilesDone / current.totalFiles) : 0;
                             current.progress = Math.max((params.installing ? 1 : 0),

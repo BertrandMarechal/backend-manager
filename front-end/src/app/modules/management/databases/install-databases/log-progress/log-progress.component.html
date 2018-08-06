@@ -16,13 +16,5 @@
       </mat-panel-description>
       <mat-progress-bar style="margin-right: 10px;" *ngIf="step.progress > 0" style="float: right; width: 300px;" mode="determinate" [value]="step.progress"></mat-progress-bar>
     </mat-expansion-panel-header>
-    <mat-list>
-      <mat-list-item *ngFor="let file of step.files">
-        <span>
-          {{file.fileName}}
-        </span>
-        <mat-icon *ngIf="file.done" style="color: green;">done</mat-icon>
-      </mat-list-item>
-    </mat-list>
   </mat-expansion-panel>
 </mat-accordion>

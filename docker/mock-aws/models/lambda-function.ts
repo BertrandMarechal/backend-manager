@@ -2,8 +2,7 @@ declare var require: any;
 declare var process: any;
 import path from 'path';
 
-
-const originFolder = process.argv[2] ? '../../../' : '../repos/';
+const originFolder = process.argv[3] || '../repos/';
 
 export class LambdaFunctionFromFile {
     [name: string]: any;
@@ -40,9 +39,11 @@ export class LambdaFunction extends LambdaFunctionFromFile {
         }
     }
     get fileNameFormatedForRequire() {
-        return path.resolve(__dirname, '../', originFolder, this.fileName.replace('//','/') + '.js');
+        return path.resolve(__dirname, '../..', originFolder, this.fileName.replace('//','/') + '.js');
     }
     call(event: any, context: any, callback: Function) {
+        console.log(this);
+        
         this.parameters.forEach((x) => {
             process.env[x.name] = x.value;
         });

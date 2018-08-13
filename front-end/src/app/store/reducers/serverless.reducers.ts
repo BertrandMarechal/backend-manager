@@ -52,7 +52,7 @@ export function serverlessReducers(state = initialState, action: ServerlessActio
                 const serviceIndex = selectedServerlessRepo.middleTiers
                     .findIndex(x => x.serviceName === state.currentUpdatingSettings.serviceName);
                 if (serviceIndex > -1) {
-                    selectedServerlessRepo.middleTiers[serviceIndex].parameters[state.currentUpdatingSettings.environment]
+                    selectedServerlessRepo.middleTiers[serviceIndex].variables[state.currentUpdatingSettings.environment]
                         .find(x => x.name === state.currentUpdatingSettings.settingName).value = state.currentUpdatingSettings.settingValue;
                 }
             }

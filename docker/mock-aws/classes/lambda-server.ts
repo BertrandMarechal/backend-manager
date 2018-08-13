@@ -4,6 +4,8 @@ import { AwsServer } from "./aws-server";
 import { LambdaFunction } from "../models/lambda-function";
 import { SubServerCommon } from "./sub-server-common";
 
+export const TEMP_FOLDER: string = '../../temp/';
+
 export class LambdaServer extends SubServerCommon {
     testSet: any[];
     constructor(postgresUtils: PostgresUtils) {
@@ -90,7 +92,7 @@ export class LambdaServer extends SubServerCommon {
                                 result: result,
                                 functionName: lambdaFunction.functionName,
                                 apiName: lambdaFunction.serviceName,
-                            });
+                            });                            
                             
                             this.emitFromSubServer('lambda function result', {testSet: this.testSet});
                             AwsServer.sendDataBack(result, res);

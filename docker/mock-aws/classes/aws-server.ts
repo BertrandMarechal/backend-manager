@@ -41,8 +41,15 @@ export class AwsServer {
         this.io = IO(this.server);
         this.app.use((req: any, res: any, next: any) => {
             res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            next();
+            res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+            res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Accept, 0, undefined, Cache-Control, 1');
+            // allow preflight
+            // if (req.method === 'OPTIONS') {
+            //     res.send(200);
+            // } else {
+            //     next();
+            // }
+            next()
         });
 
         this.app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
@@ -80,13 +87,12 @@ export class AwsServer {
             clients = Object.keys(this.clients);
         }
         clients.forEach((clientId: string) => {
-            console.log(clientId, event, data);
             this.clients[clientId].emit(event, data);
         });
     }
 
     static sendDataBack(result: any, res: any) {
-        res.send({ data: result });
+        res.send(result);
     }
 
     static sendErrorBack(error: any, res: any) {

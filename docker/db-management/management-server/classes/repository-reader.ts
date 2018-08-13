@@ -7,7 +7,6 @@ import { DatabaseVersionFileData, DatabaseVersionInformation } from "../../commo
 import * as path from "path";
 import { ServerlessFile } from "../models/serverless-file.model";
 
-// const originFolder = process.argv[2] ? '../../../' : '../repos/';
 const originFolder = process.argv[3] || '../repos/';
 const postgresDatabaseToUse = process.argv[3] ? 'localhost' : 'postgresdb';
 
@@ -358,27 +357,49 @@ export class RepositoryReader {
             Promise.all(promises)
                 .then((filesStrings: string[]) => {
                     const serverlessFile: ServerlessFile = new ServerlessFile(RepositoryReader.ymlToJson(filesStrings[0]));
-                    let variables: { key: string, value: string | null, declared: boolean }[] = [];
+                    let serverlessVariables: { key: string, value: string | null, declared: boolean }[] = [];
+                    const regexVariables = new RegExp(/\$\{file\(\.\/variables\.yml\)\:(.*?)\}/gi);
+                    // get the serverless variables
+                    serverlessVariables = serverlessFile.environmentVariables.map(x => {
+                        let newValue = x.value;
+                        let match = regexVariables.exec(newValue);
+                        const subVars = [];
+                        console.log(newValue);
+                        while (match != null) {
+                            subVars.push(match[1]);
+                            newValue = newValue.replace(regexVariables, `<${match[1]}>`)
+                            match = regexVariables.exec(newValue);
+                        }
+                        return {
+                            ...x,
+                            value: newValue,
+                            declared: true,
+                        }
+                    });
+
+                    // get the variables from variables.yml
+                    let variablesVariables: { key: string, value: string | null, declared: boolean }[] = []
                     if (filesData.hasVariables) {
                         const variablesObject: { [name: string]: string } = RepositoryReader.ymlToJson(filesStrings[1]);
-                        variables = Object.keys(variablesObject).map(x => {
+
+                        variablesVariables = Object.keys(variablesObject).map(x => {
                             return {
                                 key: x,
                                 value: variablesObject[x],
                                 declared: !!variablesObject[x]
                             };
-                        })
+                        });
                     }
+
                     // we have to see if the serverless file has more parameters that might not be declared
                     const undeclaredVariables: string[] = [];
-                    const regexVariables = new RegExp(/\$\{file\(\.\/variables\.yml\)\:(.*?)\}/gi);
 
-                    let match = regexVariables.exec(filesStrings[0]);
-                    while (match != null) {
-                        undeclaredVariables.push(match[1]);
-                        match = regexVariables.exec(filesStrings[0]);
+                    let match2 = regexVariables.exec(filesStrings[0]);
+                    while (match2 != null) {
+                        undeclaredVariables.push(match2[1]);
+                        match2 = regexVariables.exec(filesStrings[0]);
                     }
-                    variables = undeclaredVariables.reduce((agg, current) => {
+                    variablesVariables = undeclaredVariables.reduce((agg, current) => {
                         const item = agg.find(x => x.key === current);
                         if (!item) {
                             agg.push({
@@ -388,11 +409,16 @@ export class RepositoryReader {
                             });
                         }
                         return agg;
-                    }, variables);
+                    }, variablesVariables);
                     
                     this.databaseManagement
                         .setConnectionString(this.connectionString)
-                        .execute('mgtf_update_middle_tier_files', [repoName, filesData.parentFolder, JSON.stringify(serverlessFile), JSON.stringify(variables)])
+                        .execute('mgtf_update_middle_tier_files', [
+                            repoName,
+                            filesData.parentFolder,
+                            JSON.stringify(serverlessFile),
+                            JSON.stringify(serverlessVariables),
+                            JSON.stringify(variablesVariables)])
                         .then(resolve).catch(reject);
                 })
                 .catch(reject);

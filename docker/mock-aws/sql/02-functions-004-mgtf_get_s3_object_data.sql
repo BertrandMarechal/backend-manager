@@ -19,7 +19,7 @@ BEGIN
                         (i_bucket IS NULL AND i_key IS NULL)
                         OR (i_bucket = s3o_bucket AND i_key = s3o_key)
                 )
-                ORDER BY created_date desc
+                ORDER BY created_at desc
                 LIMIT 1
         );
 END

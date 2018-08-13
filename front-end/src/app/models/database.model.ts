@@ -66,6 +66,12 @@ export interface MiddleTierFile {
     serviceName: string;
     functions: LambdaFunction[];
     parameters: MiddleTierFileParameter[];
+    variables: {
+        local?: RepositoryParameter[];
+        dev?: RepositoryParameter[];
+        demo?: RepositoryParameter[];
+        prod?: RepositoryParameter[];
+    };
 }
 export interface MiddleTierFileParameter {
     key: string;

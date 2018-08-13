@@ -387,7 +387,7 @@ export class DatabaseManagement {
                 if (this.databaseInstallationProgress[this.currentDatabaseStepId].database === 'postgres') {
                     this.currentInstallationDatabase = 'postgres';
                 } else {
-                    this.currentInstallationDatabase = this.currentSettings[this.databaseInstallationProgress[this.currentDatabaseStepId].repoName].app_db_name;
+                    this.currentInstallationDatabase = this.currentSettings[this.databaseInstallationProgress[this.currentDatabaseStepId].repoName]['<app_db_name>'];
                 }
 
                 this.installDatabaseStep()

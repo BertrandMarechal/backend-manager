@@ -21,7 +21,8 @@ end
 $body$
 ;
 
-DROP TABLE IF EXISTS mgtt_middle_tier_parameter_environment_mpe;
+DROP TABLE IF EXISTS mgtt_middle_tier_variable_environment_mve;
+DROP TABLE IF EXISTS mgtt_middle_tier_variable_mtv;
 DROP TABLE IF EXISTS mgtt_lambda_function_event_lfe;
 DROP TABLE IF EXISTS mgtt_middle_tier_parameter_mtp;
 DROP TABLE IF EXISTS mgtt_middle_tier_function_mlf;

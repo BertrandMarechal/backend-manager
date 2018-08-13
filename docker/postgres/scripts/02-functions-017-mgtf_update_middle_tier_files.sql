@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION mgtf_update_middle_tier_files(i_repo_name TEXT, i_parent_folder TEXT, i_serverless_file json, i_variables_file json)
+CREATE OR REPLACE FUNCTION mgtf_update_middle_tier_files(i_repo_name TEXT, i_parent_folder TEXT, i_serverless_file json, i_serverless_variables json, i_variables_variables json)
 RETURNS INTEGER
 VOLATILE
 AS $CODE$
@@ -9,7 +9,7 @@ BEGIN
                     pk_mtf_id,
                     rep_folder_name,
                     (i_serverless_file->>'serviceName')::TEXT service_name,
-                    ((i_serverless_file->>'environmentVariables')::json) environmentVariables,
+                    i_serverless_variables environmentVariables,
                     ((i_serverless_file->>'functions')::json) as functions
             FROM mgtt_repository_rep
             LEFT JOIN mgtt_middle_tier_file_mtf
@@ -68,46 +68,56 @@ BEGIN
                     ) a
             ) b
             INNER JOIN function_data ON mlf_name = b."name"
-        ), insert_params as (
-                INSERT INTO mgtt_middle_tier_parameter_mtp (fk_mtf_mtp_middle_tier_file_id, mtp_parameter_name, mtp_declared)
+        ), insert_variables as (
+                INSERT INTO mgtt_middle_tier_variable_mtv (fk_mtf_mtv_middle_tier_file_id, mtv_variable_name, mtv_declared)
                 SELECT pk_mtf_id, v_variables.variables_values->>'key', (v_variables.variables_values->>'declared')::boolean
                 FROM insert_data_file
                 LEFT JOIN (
-                        SELECT json_array_elements(i_variables_file) as variables_values
+                        SELECT json_array_elements(i_variables_variables) as variables_values
                 ) v_variables ON true
                 WHERE v_variables.variables_values->>'key' is not null
-                returning pk_mtp_id, mtp_parameter_name
-        ), insert_param_env as (
-                INSERT INTO mgtt_middle_tier_parameter_environment_mpe (
-                        fk_env_mpe_environment_id,
-                        fk_mtp_mpe_middle_tier_parameter_id,
-                        mpe_value
+                returning pk_mtv_id, mtv_variable_name
+        ), insert_variable_env as (
+                INSERT INTO mgtt_middle_tier_variable_environment_mve (
+                        fk_env_mve_environment_id,
+                        fk_mtv_mve_middle_tier_variable_id,
+                        mve_value
                 )
-                SELECT pk_env_id, pk_mtp_id, v_variables.variables_values->>'value'
-                FROM insert_params
+                SELECT pk_env_id, pk_mtv_id, v_variables.variables_values->>'value'
+                FROM insert_variables
                 INNER JOIN mgtt_environment_env ON env_name = 'dev'
                 LEFT JOIN (
-                        SELECT json_array_elements(i_variables_file) as variables_values
-                ) v_variables ON v_variables.variables_values->>'key' = mtp_parameter_name
+                        SELECT json_array_elements(i_variables_variables) as variables_values
+                ) v_variables ON v_variables.variables_values->>'key' = mtv_variable_name
                 AND v_variables.variables_values->>'value' IS NOT NULL
-                RETURNING pk_mpe_id
+                RETURNING pk_mve_id
+        ), insert_params AS (
+                INSERT INTO mgtt_middle_tier_parameter_mtp(
+                        fk_mtf_mtp_middle_tier_file_id,
+                        mtp_parameter_name,
+                        mtp_parameter_value
+                )
+                SELECT pk_mtf_id,t."key", t."value"
+                FROM json_to_recordset(i_serverless_variables) t("key" TEXT, "value" TEXT)
+                INNER JOIN insert_data_file ON TRUE
+                RETURNING pk_mtp_id
         )
         -- update the stages for each env
-        INSERT INTO mgtt_middle_tier_parameter_environment_mpe (
-                fk_env_mpe_environment_id,
-                fk_mtp_mpe_middle_tier_parameter_id,
-                mpe_value
+        INSERT INTO mgtt_middle_tier_variable_environment_mve (
+                fk_env_mve_environment_id,
+                fk_mtv_mve_middle_tier_variable_id,
+                mve_value
         )
-        SELECT pk_env_id, pk_mtp_id,env_name
+        SELECT pk_env_id, pk_mtv_id,env_name
         FROM mgtt_environment_env
         INNER JOIN insert_data_file ON true
-        INNER JOIN insert_param_env ON true
-        LEFT JOIN insert_params ON mtp_parameter_name = 'stage'
+        INNER JOIN insert_variable_env ON true
+        LEFT JOIN insert_variables ON mtv_variable_name = 'stage'
         -- INNER JOIN mgtt_middle_tier_parameter_mtp
         --         ON insert_data_file.pk_mtf_id = fk_mtf_mtp_middle_tier_file_id
         --         AND
-        WHERE pk_mtp_id is not null
-        ON CONFLICT(fk_env_mpe_environment_id,fk_mtp_mpe_middle_tier_parameter_id) DO NOTHING;
+        WHERE pk_mtv_id is not null
+        ON CONFLICT(fk_env_mve_environment_id,fk_mtv_mve_middle_tier_variable_id) DO NOTHING;
 
     RETURN 1;
 END;

@@ -183,7 +183,7 @@ export class FileUtils {
     };
     
     static writeFileInItsFolder(fileName: string, fileData: any): Promise<null> {
-        const fileNameSplitted = fileName.split('/');
+        const fileNameSplitted = fileName.replace(/\\/gi, '/').split('/');
         if (fileNameSplitted.length > 1) {
             const folders = fileNameSplitted.splice(0, fileNameSplitted.length - 1);
             let folderName = '';

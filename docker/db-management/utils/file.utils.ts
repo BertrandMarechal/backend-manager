@@ -113,7 +113,12 @@ export class FileUtils {
                 if (error) {
                     reject(error);
                 } else {
-                    resolve(JSON.parse(data.toString('ascii')));
+                    try {
+                        resolve(JSON.parse(data.toString('ascii')));   
+                    } catch (error) {
+                        console.log(fileName);
+                        reject(error);
+                    }
                 }
             });
         });

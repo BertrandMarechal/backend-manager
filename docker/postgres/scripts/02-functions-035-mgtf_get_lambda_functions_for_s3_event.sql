@@ -5,9 +5,9 @@ AS $CODE$
 BEGIN
     RETURN
     (
-        SELECT json_agg(
+        SELECT COALESCE(json_agg(
             mgtf_get_lambda_function(mtf_service_name, mlf_name)
-        )
+        ), '[]'::json)
         FROM mgtt_lambda_function_event_lfe
         INNER JOIN mgtt_middle_tier_function_mlf
             ON fk_mlf_lfe_middle_tier_function_id = pk_mlf_id
@@ -19,7 +19,7 @@ BEGIN
         AND (
             (
                 (((lfe_parameters->>'rules')::json->0)::json)->>'type' = 'prefix'
-                AND i_file_name like ((((lfe_parameters->>'rules')::json->0)::json)->>'value')::TEXT || '%'
+                AND i_file_name like REPLACE(((((lfe_parameters->>'rules')::json->0)::json)->>'value')::TEXT,'${file(./variables.yml):stage}', 'local') || '%'
             )
             OR
             (

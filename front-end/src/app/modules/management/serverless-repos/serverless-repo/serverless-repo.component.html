@@ -16,7 +16,7 @@
                       </mat-panel-description>
                   </mat-expansion-panel-header>
                   <app-serverless-repo-parameters
-                    *ngFor="let parameter of middleTier.parameters[(management$|async)?.environment]"
+                    *ngFor="let parameter of middleTier.variables[(management$|async)?.environment]"
                     [environment]="(management$|async)?.environment"
                     [parameter]="parameter"
                     [serviceName]="middleTier.serviceName"

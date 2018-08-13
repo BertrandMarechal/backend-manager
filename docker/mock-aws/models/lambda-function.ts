@@ -39,16 +39,12 @@ export class LambdaFunction extends LambdaFunctionFromFile {
         }
     }
     get fileNameFormatedForRequire() {
-        return path.resolve(__dirname, '../..', originFolder, this.fileName.replace('//','/') + '.js');
+        return path.resolve(__dirname, '..', originFolder, this.fileName.replace('//','/') + '.js');
     }
     call(event: any, context: any, callback: Function) {
-        console.log(this);
-        
         this.parameters.forEach((x) => {
             process.env[x.name] = x.value;
         });
-        
-        console.log(this.fileNameFormatedForRequire);
         
         const lambdaFunction = require(this.fileNameFormatedForRequire);
         lambdaFunction[this.handlerFunctionName](event, context, callback);

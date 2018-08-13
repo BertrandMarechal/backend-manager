@@ -68,7 +68,7 @@ export class LambdaFunction {
 export class ServerlessFile {
     fileName: string;
     serviceName: string;
-    environmentVariables: string[];
+    environmentVariables: {key: string, value: string}[];
     functions: LambdaFunction[];
 
     constructor(params?: any) {
@@ -80,7 +80,12 @@ export class ServerlessFile {
             this.fileName = params.fileName;
             this.serviceName = params.service;
             if (params.provider.environment) {
-                this.environmentVariables = Object.keys(params.provider.environment);
+                this.environmentVariables = Object.keys(params.provider.environment).map(x => {
+                    return {
+                        key: x,
+                        value: params.provider.environment[x]
+                    };
+                });
             }
             this.functions = Object.keys(params.functions)
                 .map(x => new LambdaFunction({...params.functions[x], functionName: x}));

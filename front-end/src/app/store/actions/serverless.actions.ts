@@ -15,13 +15,30 @@ export class SelecteServerlessPageAction implements Action {
 }
 
 export const SAVE_SERVERLESS_SETTING_PAGE = '[Serverless Page] SAVE_SERVERLESS_SETTING';
+export const SERVICE_SAVE_SERVERLESS_SETTING_FOR_OTHER = '[Serverless Page] SAVE_SERVERLESS_SETTING_FOR_OTHER';
 export const SERVICE_SAVE_SERVERLESS_SETTING_COMPLETE = '[Serverless Service] SAVE_SERVERLESS_SETTING complete';
 export const SERVICE_SAVE_SERVERLESS_SETTING_FAILED = '[Serverless Service] SAVE_SERVERLESS_SETTING failed';
 export const SERVICE_SAVE_SERVERLESS_SETTING_UPDATING_WIPE = '[Serverless Service] SAVE_SERVERLESS_SETTING_UPDATING wipe';
 
 export class SaveServerlessSettingPageAction implements Action {
   readonly type = SAVE_SERVERLESS_SETTING_PAGE;
-  constructor(public payload?: { settingName: string, serviceName: string, settingValue: string, environment: string }) { }
+  constructor(public payload?: {
+    settingName: string,
+    serviceName: string,
+    settingValue: string,
+    environment: string,
+    fromService?: boolean
+  }) { }
+}
+export class SaveServerlessSettingForOtherServiceAction implements Action {
+  readonly type = SAVE_SERVERLESS_SETTING_PAGE;
+  constructor(public payload?: {
+    settingName: string,
+    serviceName: string,
+    settingValue: string,
+    environment: string,
+    fromService?: boolean
+  }[]) { }
 }
 export class ServiceSaveServerlessSettingCompleteAction implements Action {
   readonly type = SERVICE_SAVE_SERVERLESS_SETTING_COMPLETE;

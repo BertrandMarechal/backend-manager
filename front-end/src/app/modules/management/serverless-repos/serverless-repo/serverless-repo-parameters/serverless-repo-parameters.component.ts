@@ -25,7 +25,6 @@ export class ServerlessRepoParametersComponent implements OnInit, OnChanges {
     this.parameterValue = '';
   }
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes);
     if (changes['environment']) {
       this.environment = changes['environment'].currentValue;
     }

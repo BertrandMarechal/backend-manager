@@ -11,7 +11,13 @@ export interface State {
     serverlessRepos: RepositoryFile[];
     selectedServerlessRepo: RepositoryFile;
     updatingSettings: {[name: string]: boolean};
-    currentUpdatingSettings: { settingName: string, serviceName: string, settingValue: string, environment: string };
+    currentUpdatingSettings: {
+        settingName: string,
+        serviceName: string,
+        settingValue: string,
+        environment: string,
+        fromService?: boolean
+    };
 }
 export const initialState: State = {
     serverlessRepos: [],

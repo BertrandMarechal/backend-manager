@@ -26,6 +26,17 @@ export class ManagementService {
         });
     }
 
+    static getErrorText(error: {
+        code?: string,
+        path?: string
+    }): string {
+        if (error.code && error.code === 'ENOENT') {
+            return `A file could not be found. Please make sure the file is correctly mapped. File name :<br>${error.path}`;
+        }
+        console.log(error);
+        return 'Unknown error';
+    }
+
     getEnvironments(): Promise<{ environmentName: string }[]> {
         return <Promise<{ environmentName: string }[]>>this.localhostService.get('environments');
     }

@@ -1,6 +1,7 @@
 INSERT INTO mgtt_setting_set (set_name, set_value)
 SELECT 'database extension', 'database' UNION ALL
-SELECT 'middle tier extension', 'middle-tier';
+SELECT 'middle tier extension', 'middle-tier' UNION ALL
+SELECT 'AWS profile name', 'default';
 
 INSERT INTO mgtt_setting_set (set_name, set_value,fk_env_set_environment_id)
 SELECT 'root password', 

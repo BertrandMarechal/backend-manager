@@ -207,6 +207,23 @@ export class ManagementEffects {
       }),
   );
   @Effect()
+  runRepoDiscoveryFailed: Observable<Action> = this.actions$
+    .ofType(ManagementActions.SERVICE_REPO_DISCOVERY_FAILED)
+    .pipe(
+      switchMap((action: ManagementActions.ServiceRunRepoDiscoveryFailedAction) => {
+        swal({
+          type: 'error',
+          text: 'Discovery failed',
+          html: ManagementService.getErrorText(action.payload)
+        });
+        return [
+          {
+            type: ManagementActions.MANAGEMENT_NOTHING
+          },
+        ];
+      })
+  );
+  @Effect()
   repoDiscoveryProgress: Observable<Action> = this.actions$
     .ofType(ManagementActions.SERVICE_REPO_DISCOVERY_PROGRESS)
     .pipe(
@@ -236,7 +253,6 @@ export class ManagementEffects {
     )
     .pipe(
       switchMap((action: ManagementActions.ServiceRunRepoDiscoveryCompleteAction) => {
-        console.log(action.payload);
         return [
           {
             type: DatabaseActions.DATABASE_REPOSITORIES_UPDATED,

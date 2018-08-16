@@ -86,7 +86,7 @@ export class ServiceRunRepoDiscoveryCompleteAction implements Action {
 }
 export class ServiceRunRepoDiscoveryFailedAction implements Action {
   readonly type = SERVICE_REPO_DISCOVERY_FAILED;
-  constructor(public payload?: string) { }
+  constructor(public payload?: any) { }
 }
 
 export const MANAGEMENT_SERVER_CONNECTED =

@@ -138,6 +138,11 @@ export function managementeReducers(state = initialState, action: ManagementActi
                 hasDatabases: hasDatabases,
                 hasMiddleTiers: hasMiddleTiers,
             };
+        case ManagementActions.SERVICE_REPO_DISCOVERY_FAILED:
+            return {
+                ...state,
+                currentDiscoveryStep: null
+            };
         case ManagementActions.MANAGEMENT_SERVER_CONNECTED:
             return {
                 ...state,

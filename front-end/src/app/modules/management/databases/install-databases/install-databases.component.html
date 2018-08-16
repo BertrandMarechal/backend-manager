@@ -36,21 +36,24 @@
             </mat-expansion-panel-header>
 
             <mat-action-row>
-              <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version, database: dbVersion.databaseToUse})">Install version step</button>
+              <span class="cannot-install-text" *ngIf="!database.parametersSet[(management$|async).environment]">Cannot install version as some parameters are missing</span>
+              <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version, database: dbVersion.databaseToUse})" *ngIf="database.parametersSet[(management$|async).environment]">Install version step</button>
             </mat-action-row>
 
           </mat-expansion-panel>
         </mat-accordion>
 
         <mat-action-row>
-          <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version})">Install version</button>
+          <span class="cannot-install-text" *ngIf="!database.parametersSet[(management$|async).environment]">Cannot install version as some parameters are missing</span>
+          <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version})" *ngIf="database.parametersSet[(management$|async).environment]">Install version</button>
         </mat-action-row>
 
       </mat-expansion-panel>
     </mat-accordion>
 
     <mat-action-row>
-      <button mat-button color="primary" (click)="onInstall({repoName: database.name})">Install application</button>
+      <span class="cannot-install-text" *ngIf="!database.parametersSet[(management$|async).environment]">Cannot install application as some parameters are missing</span>
+      <button mat-button color="primary" (click)="onInstall({repoName: database.name})" *ngIf="database.parametersSet[(management$|async).environment]">Install application</button>
     </mat-action-row>
 
   </mat-expansion-panel>

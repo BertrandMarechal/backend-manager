@@ -1,6 +1,6 @@
 import { AppState } from './app.reducers';
 import * as DatabaseActions from '../actions/database.actions';
-import { RepositoryFile, DatabaseInformation, DatabaseInstallationProgress } from '../../models/database.model';
+import { RepositoryFile, DatabaseInformation, DatabaseInstallationProgress, Database } from '../../models/database.model';
 import { DatabaseService } from '../../services/database.service';
 
 export interface FeatureState extends AppState {
@@ -8,10 +8,10 @@ export interface FeatureState extends AppState {
 }
 
 export interface State {
-  databases: RepositoryFile[];
+  databases: Database[];
   initializingDatabase: boolean;
   creatingNewVersion: boolean;
-  selectedDatabase: RepositoryFile;
+  selectedDatabase: Database;
   filteredDatabaseFiles: string[];
   canCreateNewVersion: boolean;
   hasCurrentFolder: boolean;
@@ -46,14 +46,14 @@ export const initialState: State = {
 export function databaseReducers(state = initialState, action: DatabaseActions.DatabaseActions) {
   switch (action.type) {
     case DatabaseActions.DATABASE_REPOSITORIES_UPDATED:
-      let selectedDatabase: RepositoryFile = null;
+      let selectedDatabase: Database = null;
       if (state.selectedDatabase) {
-        selectedDatabase = (action.payload || [])
-          .filter(x => x.isDatabase && x.name === state.selectedDatabase.name)[0];
+        selectedDatabase = new Database((action.payload || [])
+          .filter(x => x.isDatabase && x.name === state.selectedDatabase.name)[0]);
       }
       return {
         ...state,
-        databases: (action.payload || []).filter(x => x.isDatabase),
+        databases: (action.payload || []).filter(x => x.isDatabase).map(x => new Database(x)),
         selectedDatabase: selectedDatabase,
         selectedDatabaseInformation: state.selectedDatabaseInformation.processDatabaseData(selectedDatabase)
       };
@@ -120,7 +120,7 @@ export function databaseReducers(state = initialState, action: DatabaseActions.D
           ...state.updatingSetting,
           done: true
         },
-        selectedDatabase: {
+        selectedDatabase: new Database({
           ...state.selectedDatabase,
           parameters: {
             ...state.selectedDatabase.parameters,
@@ -138,8 +138,9 @@ export function databaseReducers(state = initialState, action: DatabaseActions.D
                 })
             ]
           }
-        }
+        })
       };
+      newState.selectedDatabase.checkParameters();
       return newState;
     case DatabaseActions.SERVICE_SAVE_SETTING_FAILED:
     case DatabaseActions.SERVICE_SAVE_SETTING_UPDATING_WIPE:

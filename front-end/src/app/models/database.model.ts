@@ -1,6 +1,6 @@
 export type Environments = 'local' | 'dev' | 'demo' | 'prod';
 
-export interface RepositoryFile {
+export class RepositoryFile {
     name: string;
     databases: DatabaseFile[];
     isDatabase: boolean;
@@ -12,6 +12,43 @@ export interface RepositoryFile {
         demo?: RepositoryParameter[];
         prod?: RepositoryParameter[];
     };
+    constructor(data: any) {
+        if (data) {
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    this[key] = data[key];
+                }
+            }
+        }
+    }
+}
+
+export class Database extends RepositoryFile {
+    parametersSet: {
+        local: boolean;
+        dev: boolean;
+        demo: boolean;
+        prod: boolean;
+    };
+    constructor(data: any) {
+        super(data);
+        if (data) {
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    this[key] = data[key];
+                }
+            }
+        }
+        this.checkParameters();
+    }
+    checkParameters() {
+        this.parametersSet = {
+            local: (this.parameters.local || []).filter(x => !x.value).length === 0,
+            dev: (this.parameters.dev || []).filter(x => !x.value).length === 0,
+            demo: (this.parameters.demo || []).filter(x => !x.value).length === 0,
+            prod: (this.parameters.prod || []).filter(x => !x.value).length === 0
+        };
+    }
 }
 interface IDatabaseInstallationProgress {
     repoName: string;

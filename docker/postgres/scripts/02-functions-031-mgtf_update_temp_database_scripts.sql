@@ -16,13 +16,19 @@ BEGIN
                   AND dbv_database_to_use = 'postgres';
                   
                   UPDATE temp_database_scripts
-                  SET dependency_position = 0
-                  WHERE depending in(
-                        select pk_dbv_id
+                  SET dependency_position = 1
+                  WHERE dbv_version_id in (
+                        select dbv_version_id
                         FROM temp_database_scripts
                         WHERE db_position = 0
                   );
                   
+                RETURN 1;
+        ELSEIF EXISTS (
+                SELECT 1
+                FROM temp_database_scripts
+                WHERE db_position = i_level
+        ) THEN
                 RETURN 1;
         ELSE
                 UPDATE temp_database_scripts

@@ -284,7 +284,7 @@ export class DatabaseEffects {
           swal({
             type: 'error',
             title: 'Script failed',
-            html: 'The following script failed: <br/>' + firstScriptFailing
+            html: `Error on the following script: <br><table><tr><td>Script</td><td>${firstScriptFailing}</td></tr><tr><td>Error</td><td>${action.payload.internalQuery}</td></tr></table>`
           });
         } else {
           console.log(action);

@@ -4,6 +4,7 @@ import * as fromManagement from '../../../../store/reducers/management.reducers'
 import * as DatabaseActions from '../../../../store/actions/database.actions';
 import { Observable } from 'rxjs/internal/Observable';
 import { Store } from '@ngrx/store';
+import { RepositoryFile } from '../../../../models/database.model';
 
 type InstallationObjectType = 'Application' | 'Version' | 'Version step' | 'File';
 
@@ -33,5 +34,9 @@ export class InstallDatabasesComponent implements OnInit {
     fileName?: string
   }) {
     this.store.dispatch(new DatabaseActions.InstallDatabasePageAction(params));
+  }
+
+  onSelectDatabase(database: RepositoryFile) {
+    this.store.dispatch(new DatabaseActions.SelecteDatabasePageAction(database));
   }
 }

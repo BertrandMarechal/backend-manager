@@ -36,7 +36,7 @@
             </mat-expansion-panel-header>
 
             <mat-action-row>
-              <span class="cannot-install-text" *ngIf="!database.parametersSet[(management$|async).environment]">Cannot install version as some parameters are missing</span>
+              <span class="cannot-install-text" *ngIf="!database.parametersSet[(management$|async).environment]">Cannot install version as some parameters are missing. <a (click)="onSelectDatabase(database)" style="cursor: pointer; color: blue;">Sort it</a></span>
               <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version, database: dbVersion.databaseToUse})" *ngIf="database.parametersSet[(management$|async).environment]">Install version step</button>
             </mat-action-row>
 
@@ -44,7 +44,7 @@
         </mat-accordion>
 
         <mat-action-row>
-          <span class="cannot-install-text" *ngIf="!database.parametersSet[(management$|async).environment]">Cannot install version as some parameters are missing</span>
+          <span class="cannot-install-text" *ngIf="!database.parametersSet[(management$|async).environment]">Cannot install version as some parameters are missing. <a (click)="onSelectDatabase(database)" style="cursor: pointer; color: blue;">Sort it</a></span>
           <button mat-button color="primary" (click)="onInstall({repoName: database.name, version: db.version})" *ngIf="database.parametersSet[(management$|async).environment]">Install version</button>
         </mat-action-row>
 
@@ -52,7 +52,7 @@
     </mat-accordion>
 
     <mat-action-row>
-      <span class="cannot-install-text" *ngIf="!database.parametersSet[(management$|async).environment]">Cannot install application as some parameters are missing</span>
+      <span class="cannot-install-text" *ngIf="!database.parametersSet[(management$|async).environment]">Cannot install application as some parameters are missing.  <a (click)="onSelectDatabase(database)" style="cursor: pointer; color: blue;">Sort it</a></span>
       <button mat-button color="primary" (click)="onInstall({repoName: database.name})" *ngIf="database.parametersSet[(management$|async).environment]">Install application</button>
     </mat-action-row>
 

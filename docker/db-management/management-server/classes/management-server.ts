@@ -60,22 +60,23 @@ export class ManagementServer {
     }
 
     private runDatabaseInitializationSctipt(): Promise<any> {
-        console.log('This step is made to run the SQL scripts on starting the ser on local use.');
-        console.log('WAIT FOR IT TO END before doing anything.');
-        console.log('REMOVE it on real use case.');
-        console.log('### STARTING ###');
-        return new Promise((resolve, reject) => {
-            FileUtils.getFileList({
-                startPath: '../postgres/scripts',
-                filter: /\.sql/
-            })
-                .then((fileList) => {
-                    console.log(fileList.length + ' files to run');
-                    this.runFiles(fileList)
-                        .then(resolve)
-                        .catch(reject);
-                });
-        });
+        return Promise.resolve();
+        // console.log('This step is made to run the SQL scripts on starting the ser on local use.');
+        // console.log('WAIT FOR IT TO END before doing anything.');
+        // console.log('REMOVE it on real use case.');
+        // console.log('### STARTING ###');
+        // return new Promise((resolve, reject) => {
+        //     FileUtils.getFileList({
+        //         startPath: '../postgres/scripts',
+        //         filter: /\.sql/
+        //     })
+        //         .then((fileList) => {
+        //             console.log(fileList.length + ' files to run');
+        //             this.runFiles(fileList)
+        //                 .then(resolve)
+        //                 .catch(reject);
+        //         });
+        // });
     }
 
     private runFiles(fileList: string[]): Promise<any> {
